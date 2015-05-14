@@ -35,7 +35,7 @@ class ForumMemberProfile extends Page_Controller {
 	 * Create breadcrumbs (just shows a forum holder link and name of user)
 	 * @return string HTML code to display breadcrumbs
 	 */
-	public function Breadcrumbs() {
+	public function Breadcrumbs($maxDepth = 20, $unlinked = false, $stopAtPageType = false, $showHidden = false) {
 		$nonPageParts = array();
 		$parts = array();
 
@@ -109,6 +109,12 @@ class ForumMemberProfile extends Page_Controller {
 			(isset($_POST['IdentityURL']) && !empty($_POST['IdentityURL']));
 
 		$fields = singleton('Member')->getForumFields($use_openid, true);
+		
+		$forums = Forum::get("Forum")->map()->toArray();
+		
+		if(count($forums) > 1) {
+			$fields->push(ListboxField::create('ForumRequest', 'Access to Forums', $forums)->setMultiple(true));
+		}
 
 		// If a BackURL is provided, make it hidden so the post-registration
 		// can direct to it.
