@@ -110,10 +110,11 @@ class ForumMemberProfile extends Page_Controller {
 
 		$fields = singleton('Member')->getForumFields($use_openid, true);
 		
-		$forums = Forum::get("Forum")->map()->toArray();
+		// Get Forum Groups
+		$forumGroups = $this->getForumHolder()->RegGroups()->map()->toArray();
 		
-		if(count($forums) > 1) {
-			$fields->push(ListboxField::create('ForumRequest', 'Access to Forums', $forums)->setMultiple(true));
+		if(count($forumGroups) > 1) {
+			$fields->push(ListboxField::create('ForumGroups', 'Access to Forums', $forumGroups)->setMultiple(true));
 		}
 
 		// If a BackURL is provided, make it hidden so the post-registration
@@ -166,7 +167,7 @@ class ForumMemberProfile extends Page_Controller {
 	 * @param Form $form The used form
 	 */
 	function doregister($data, $form) {
-
+		
 		// Check if the honeypot has been filled out
 		if(ForumHolder::$use_honeypot_on_register) {
 			if(@$data['username']) {
@@ -177,8 +178,6 @@ class ForumMemberProfile extends Page_Controller {
 				return $this->httpError(403);
 			}
 		}
-
-		$forumGroup = Group::get()->filter('Code', 'forum-members')->first();
 
 		if($member = Member::get()->filter('Email', $data['Email'])->first()) {
   			if($member) {
@@ -218,8 +217,14 @@ class ForumMemberProfile extends Page_Controller {
   		
 		$member->write();
 		$member->login();
+		
+		
+		// Add the member to each of the groups
+		foreach($data['ForumGroups'] as $id) {
+			$member->Groups()->add($id);
+		}
 
-		$member->Groups()->add($forumGroup);
+		
 
 		$member->extend('onForumRegister', $this->request);
 

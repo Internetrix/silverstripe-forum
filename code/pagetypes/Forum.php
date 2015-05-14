@@ -214,9 +214,7 @@ class Forum extends Page {
 		$this->beforeUpdateCMSFields(function($fields) use ($self) {
 			Requirements::javascript("forum/javascript/ForumAccess.js");
 			Requirements::css("forum/css/Forum_CMS.css");
-			
-			$fields->addFieldToTab("Root.Access", new HeaderField(_t('Forum.ACCESSPOST','Who can post to the forum?'), 2));
-		
+
 			$fields->addFieldToTab("Root.Access", new HeaderField(_t('Forum.ACCESSPOST','Who can post to the forum?'), 2));
 			$fields->addFieldToTab("Root.Access", $optionSetField = new OptionsetField("CanPostType", "", array(
 				"Inherit" => "Inherit",

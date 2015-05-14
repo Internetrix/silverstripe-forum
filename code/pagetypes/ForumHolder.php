@@ -36,6 +36,10 @@ class ForumHolder extends Page {
 	private static $has_many = array(
 		"Categories" => "ForumCategory"
 	);
+	
+	private static $many_many = array(
+		'RegGroups' => 'Group'
+	);
 
 	private static $allowed_children = array('Forum');
 	
@@ -146,6 +150,10 @@ class ForumHolder extends Page {
 				"LoggedInUsers" => _t('Forum.READLOGGEDIN', 'Logged-in users'),
 				"NoOne" => _t('Forum.READNOONE', 'Nobody. Make Forum Read Only')
 			)));
+			
+			$fields->addFieldToTab("Root.Access", HeaderField::create('Show which groups on the Registration Form?'));
+			
+			$fields->addFieldToTab("Root.Access", TreeMultiselectField::create("RegGroups", "Group"));
 			
 		});
 		

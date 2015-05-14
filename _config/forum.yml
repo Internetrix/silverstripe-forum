@@ -9,6 +9,9 @@ Member_Validator:
   extensions:
     ForumRole_Validator:
       ForumRole_Validator
+Group:
+  extensions:
+    - ForumGroupExtension
 Post:
   extensions:
     - ForumSpamPostExtension
