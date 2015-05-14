@@ -7,7 +7,7 @@ class ForumSpamPostExtension extends DataExtension {
 		$member = Member::currentUser();
 		$forum = $this->owner->Forum();
 
-		// Do Status filtering
+		/* Do Status filtering
 
 		Debug::show($this->owner);
 		if(!$this->owner->ID) {
@@ -25,6 +25,7 @@ class ForumSpamPostExtension extends DataExtension {
 		}
 
 		$query->addWhere($filter);
+		*/
 
 		// Filter out posts where the author is in some sort of banned / suspended status
 

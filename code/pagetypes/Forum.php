@@ -449,6 +449,13 @@ class Forum extends Page {
 			->setGroupBy('"ThreadID"')
 			->addWhere(sprintf('"ForumID" = \'%s\'', $this->ID))
 			->setDistinct(false);
+		
+		// Only show Moderated posts for users
+		if(!$this->canModerate()) {
+			$postQuery->addWhere('"Status" IN (\'Moderated\')');
+		} else {
+			$postQuery->addWhere('"Status" IN (\'Moderated\', \'Awaiting\', \'Rejected\')');
+		}
 
 		// Get a list of forum threads inside this forum that aren't sticky
 		$threads = ForumThread::get()->filter(array(
@@ -756,6 +763,12 @@ class Forum_Controller extends Page_Controller {
 		$posts = Post::get()
 			->filter('ThreadID', $this->urlParams['ID'])
 			->sort('Created', $sortDirection);
+		
+		if(!$this->canModerate()) {
+			$posts = $posts->filter('Status', array('Moderated', 'Awaiting', 'Rejected'));
+		} else {
+			$posts = $posts->filter('Status', 'Moderated');
+		}
 
 		if(isset($_GET['showPost']) && !isset($_GET['start'])) {
 			$postIDList = clone $posts;

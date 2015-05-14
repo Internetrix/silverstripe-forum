@@ -230,7 +230,6 @@ class ForumHolder extends Page {
 	 * @return int Returns the number of posts
 	 */
 	public function getNumPosts() {
-		Debug::show($this->ID);
 		return Post::get()
 			->innerJoin(ForumHolder::baseForumTable(),"\"Post\".\"ForumID\" = \"ForumPage\".\"ID\"" , "ForumPage")
 			->filter(array(
