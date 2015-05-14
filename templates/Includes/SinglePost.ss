@@ -24,14 +24,25 @@
 				<p>$Top.ReplyLink</p>
 			<% end_if %>
 		</div>
+		
+		<% if $ApprovePostLink %>
+		<div class="approvepost" style="background: red; color: white;">
+			<p>This Post Requires Approval</p>
+		</div>
+		<% end_if %>
+		
 		<h4><a href="$Link">$Title <img src="forum/images/right.png" alt="Link to this post" title="Link to this post" /></a></h4>
 		<p class="post-date">$Created.Long at $Created.Time
 		<% if Updated %>
 			<strong><% _t('SinglePost_ss.LASTEDITED','Last edited:') %> $Updated.Long <% _t('SinglePost_ss.AT') %> $Updated.Time</strong>
 		<% end_if %></p>
 		
-		<% if EditLink || DeleteLink %>
+		<% if EditLink || DeleteLink || ApprovePostLink %>
 			<div class="post-modifiers">
+				<% if $ApprovePostLink %>
+					$ApprovePostLink
+				<% end_if %>
+				
 				<% if EditLink %>
 					$EditLink
 				<% end_if %>

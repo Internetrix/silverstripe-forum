@@ -9,7 +9,7 @@ class ForumSpamPostExtension extends DataExtension {
 
 		// Do Status filtering
 
-		if($member && is_numeric($forum->ID) && $member->ID == $forum->Moderator()->ID) {
+		if($member && is_numeric($forum->ID) && $forum->canModerate()) {
 			$filter = "\"Post\".\"Status\" IN ('Moderated', 'Awaiting')";
 		} else {
 			$filter = "\"Post\".\"Status\" = 'Moderated'";

@@ -238,6 +238,26 @@ class Post extends DataObject {
 		}
 		return false;
 	}
+	
+	/**
+	 * Return a link to mark this post as spam.
+	 * used for the spamprotection module
+	 *
+	 * @return String
+	 */
+	function ApprovePostLink() {
+		if($this->Thread()->canModerate() && $this->Status == 'Awaiting') {
+			$member = Member::currentUser();
+			$url = Controller::join_links($this->Forum()->Link('approvepost'),$this->ID);
+			$token = SecurityToken::inst();
+			$url = $token->addToUrl($url);
+
+			$firstPost = ($this->isFirstPost()) ? ' firstPost' : '';
+
+			return '<a href="' . $url .'" class="markAsSpamLink' . $firstPost . '" rel="' . $this->ID . '">Approve Post</a>';
+		}
+		return false;
+	}
 
 	public function BanLink() {
 		$thread = $this->Thread();

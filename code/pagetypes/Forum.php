@@ -25,6 +25,7 @@ class Forum extends Page {
 		"Abstract" => "Text",
 		"CanPostType" => "Enum('Inherit, Anyone, LoggedInUsers, OnlyTheseUsers, NoOne', 'Inherit')",
 		"CanAttachFiles" => "Boolean",
+		"PostsRequireModeration" => "Boolean"
 	);
 
 	private static $has_one = array(
@@ -529,7 +530,8 @@ class Forum_Controller extends Page_Controller {
 		'unsubscribe',
 		'rss',
 		'ban',
-		'ghost'
+		'ghost',
+		'approvepost'
 	);
 	
 	
@@ -1014,6 +1016,10 @@ class Forum_Controller extends Page_Controller {
 			$post->ThreadID = $thread->ID;
 		}
 		
+		if($this->PostsRequireModeration) {
+			$post->Status = "Awaiting";
+		}
+		
 		$post->ForumID = $thread->ForumID;
 		$post->Content = $content;
 		$post->write();
@@ -1045,12 +1051,16 @@ class Forum_Controller extends Page_Controller {
 		ForumThread_Subscription::notify($post);
 		
 		// Send any notifications to moderators of the forum
-		if (Forum::$notify_moderators) {
-			if(isset($starting_thread) && $starting_thread) $this->notifyModerators($post, $thread, true);
-			else $this->notifyModerators($post, $thread);
+		if ($this->PostsRequireModeration) {
+			$this->notifyModerators($post, $thread);
 		}
 		
-		return $this->redirect($post->Link());
+		// Redirect to Forum 
+		if($this->PostsRequireModeration && !$thread) {
+			return $this->redirect($this->Link());
+		} else {
+			return $this->redirect($post->Link());
+		}
 	}
 	
 	/**
@@ -1058,29 +1068,38 @@ class Forum_Controller extends Page_Controller {
 	 */
 	function notifyModerators($post, $thread, $starting_thread = false) {
 		$moderators = $this->Moderators();
-		if($moderators && $moderators->exists()) {
-			foreach($moderators as $moderator){
-				if($moderator->Email){
-					$adminEmail = Config::inst()->get('Email', 'admin_email');
-
-					$email = new Email();
-					$email->setFrom($adminEmail);
-					$email->setTo($moderator->Email);
-					if($starting_thread){
-						$email->setSubject('New thread "' . $thread->Title . '" in forum ['. $this->Title.']');
-					}else{
-						$email->setSubject('New post "' . $post->Title. '" in forum ['.$this->Title.']');
-					}
-					$email->setTemplate('ForumMember_NotifyModerator');
-					$email->populateTemplate(new ArrayData(array(
-						'NewThread' => $starting_thread,
-						'Moderator' => $moderator,
-						'Author' => $post->Author(),
-						'Forum' => $this,
-						'Post' => $post
-					)));
+		
+		if($groups = $this->PosterGroups()) {
+			foreach($groups as $group) {
+				$modGroup = $group->Moderators();
+				
+				if($modGroup) { // Moderator
+					foreach($modGroup as $mod) {
+						$modemail = $mod->Email;
 					
-					$email->send();
+						if($mod->Email){
+							$adminEmail = Config::inst()->get('Email', 'admin_email');
+					
+							$email = new Email();
+							$email->setFrom($adminEmail);
+							$email->setTo($mod->Email);
+							if($starting_thread){
+								$email->setSubject($this->Title.': New thread "' . $thread->Title . '"');
+							}else{
+								$email->setSubject($this->Title.': New post "' . $post->Title. '"');
+							}
+							$email->setTemplate('ForumMember_NotifyModerator');
+							$email->populateTemplate(new ArrayData(array(
+								'NewThread' => $starting_thread,
+								'Moderator' => $moderator,
+								'Author' => $post->Author(),
+								'Forum' => $this,
+								'Post' => $post
+							)));
+					
+							$email->send();
+						}
+					}
 				}
 			}
 		}
@@ -1368,6 +1387,27 @@ class Forum_Controller extends Page_Controller {
 		}
 		
 		return $this->redirect($this->Link());
+	}
+	
+	// Approves posts that require moderation
+	
+	function approvepost(SS_HTTPRequest $request) {
+		$currentUser = Member::currentUser();
+		if(!isset($this->urlParams['ID'])) return $this->httpError(400);
+		if(!$this->canModerate()) return $this->httpError(403);
+	
+		// Check CSRF token
+		if (!SecurityToken::inst()->checkRequest($request)) {
+			return $this->httpError(400);
+		}
+	
+		$post = Post::get()->byID($this->urlParams['ID']);
+		if($post) {
+			$post->Status = 'Moderated';
+			$post->write();
+		}
+	
+		return (Director::is_ajax()) ? true : $this->redirect($post->Link());
 	}
 }
 
