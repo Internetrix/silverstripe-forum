@@ -25,6 +25,8 @@ class ForumGroupExtension extends DataExtension {
 			
 			$config = GridFieldConfig_RelationEditor::create();
 			$fields->addFieldToTab('Root.Forum', CheckboxField::create('UserModerationRequired', 'Do Users Require Approval?'));
+			$fields->addFieldToTab('Root.Forum', HeaderField::create('Forum Moderators'));
+			$fields->addFieldToTab('Root.Forum', LiteralField::create('ForumExp', 'The members listed below are able to moderate the forum that this group belongs to.'));
 			$fields->addFieldToTab('Root.Forum', GridField::create('Moderators', 'Moderators', $this->owner->Moderators(), $config));
 
 		}

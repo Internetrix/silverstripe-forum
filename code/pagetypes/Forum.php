@@ -62,7 +62,34 @@ class Forum extends Page {
 	 */
 	function canView($member = null) {
 		if(!$member) $member = Member::currentUser();
-		return (parent::canView($member) || $this->canModerate($member));
+		
+		if(is_numeric($member)) {
+			$member = Member::get()->byID($member);
+		}
+		
+		if($member == null) {
+			return false;
+		}
+		
+		if($groups = $this->PosterGroups()) {
+			foreach($groups as $group) {
+				$memberGroup = $group->Members()->byID($member->ID);
+				
+				if($memberGroup) {
+					if($memberGroup->Approved) {
+						return true;
+					} else {
+						return false;
+					}
+				} else if($this->canModerate($member)) {
+					return true;
+				} else {
+					return false;
+				}
+			}
+		}
+		
+		return (parent::canView($member));
 	}
 	
 	/**
@@ -92,7 +119,19 @@ class Forum extends Page {
 
 			if($groups = $this->PosterGroups()) {
 				foreach($groups as $group) {
-					if($member->inGroup($group)) return true;
+					$memberGroup = $group->Members()->byID($member->ID);
+					
+					if($memberGroup) {
+						if($memberGroup->Approved) {
+							return true;
+						} else {
+							return false;
+						}
+					} else if($this->canModerate($member)) {
+						return true;
+					} else {
+						return false;
+					}
 				}
 			}
 		}
@@ -112,7 +151,17 @@ class Forum extends Page {
 		if ($this->canEdit($member)) return true; 
 
 		// Moderators
-		if ($member->isModeratingForum($this)) return true;
+		if($groups = $this->PosterGroups()) {
+			foreach($groups as $group) {
+				$memberGroup = $group->Moderators()->byID($member->ID);
+				
+				if($memberGroup) {
+					return true;
+				} else {
+					return false;
+				}
+			}
+		}
 
 		return false;
 	}
@@ -215,7 +264,7 @@ class Forum extends Page {
 			Requirements::javascript("forum/javascript/ForumAccess.js");
 			Requirements::css("forum/css/Forum_CMS.css");
 
-			$fields->addFieldToTab("Root.Access", new HeaderField(_t('Forum.ACCESSPOST','Who can post to the forum?'), 2));
+			$fields->addFieldToTab("Root.Access", new HeaderField(_t('Forum.ACCESSPOST','Who can view and to the forum?'), 2));
 			$fields->addFieldToTab("Root.Access", $optionSetField = new OptionsetField("CanPostType", "", array(
 				"Inherit" => "Inherit",
 				"Anyone" => _t('Forum.READANYONE', 'Anyone'),
@@ -228,6 +277,7 @@ class Forum extends Page {
 	
 			$fields->addFieldsToTab("Root.Access", array( 
 				new TreeMultiselectField("PosterGroups", _t('Forum.GROUPS',"Groups")),
+				CheckboxField::create('PostsRequireModeration', 'Posts Require Moderation'),
 				new OptionsetField("CanAttachFiles", _t('Forum.ACCESSATTACH','Can users attach files?'), array(
 					"1" => _t('Forum.YES','Yes'),
 					"0" => _t('Forum.NO','No')
