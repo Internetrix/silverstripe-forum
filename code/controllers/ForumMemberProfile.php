@@ -217,13 +217,45 @@ class ForumMemberProfile extends Page_Controller {
   		
 		$member->write();
 		$member->login();
-		
-		
+
 		// Add the member to each of the groups
 		foreach($data['ForumGroups'] as $id) {
-			$member->Groups()->add($id);
+			$group = Group::get('Group', 'IsForumGroup = 1')->byID($id);
+			// Only add if it is a Forum Group
+			if($group) {
+				$member->Groups()->add($group->ID);
+				
+				if($group->UserModerationRequired) {
+					// Need to notify the moderators of this group
+					foreach($group->Moderators() as $mod) {
+						$modemail = $mod->Email;
+						
+						if($mod->Email){
+							$adminEmail = Config::inst()->get('Email', 'admin_email');
+						
+							$email = new Email();
+							$email->setFrom($adminEmail);
+							$email->setTo($mod->Email);
+							$email->setSubject($group->Title . ': User Requires Moderation');
+							$email->setTemplate('ForumRegistration_NotifyModerator');
+							$email->populateTemplate(new ArrayData(array(
+									'Moderator' => $mod,
+									'GroupTitle' => $group->Title,
+									'NewUser' => $member,
+									'ApproveLink' => ''
+							)));
+						
+							$email->send();
+						}
+					}
+				} else {
+					// User doesn't require moderation. We can auto approve them
+					$members  = $group->Members();
+					$newMember  = $members->byID($member->ID);
+					$members->add($newMember, array('Approved' => 1));
+				}
+			}
 		}
-
 		
 
 		$member->extend('onForumRegister', $this->request);
@@ -232,6 +264,9 @@ class ForumMemberProfile extends Page_Controller {
 
 		return array("Form" => ForumHolder::get()->first()->ProfileAdd);
 	}
+	
+
+	
 
 
 	/**
