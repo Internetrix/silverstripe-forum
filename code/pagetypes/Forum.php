@@ -149,13 +149,13 @@ class Forum extends Page {
 		if(!$member) return false;
 		
 		// Admins
-		if ($this->canEdit($member)) return true; 
-
+		if ($this->canEdit($member)) return true;
+	
 		// Moderators
 		if($groups = $this->PosterGroups()) {
 			foreach($groups as $group) {
 				$memberGroup = $group->Moderators()->byID($member->ID);
-				
+
 				if($memberGroup) {
 					return true;
 				} else {
@@ -163,7 +163,9 @@ class Forum extends Page {
 				}
 			}
 		}
-
+		Debug::show($this);
+		Debug::show($groups->Count());
+		SS_Backtrace::backtrace();
 		return false;
 	}
 	

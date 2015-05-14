@@ -9,9 +9,18 @@ class ForumSpamPostExtension extends DataExtension {
 
 		// Do Status filtering
 
+		Debug::show($this->owner);
+		if(!$this->owner->ID) {
+			return;
+		}
+		Debug::show($forum->canModerate());
+
 		if($member && is_numeric($forum->ID) && $forum->canModerate()) {
+			Debug::show("here ".$this->owner->Title);
 			$filter = "\"Post\".\"Status\" IN ('Moderated', 'Awaiting')";
 		} else {
+			Debug::show($this->owner);
+			
 			$filter = "\"Post\".\"Status\" = 'Moderated'";
 		}
 
