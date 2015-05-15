@@ -6,7 +6,7 @@ $NewUser.FirstName $NewUser.Surname ($NewUser.Email) has signed up for <strong>$
 
 <h3>Actions</h3>
 <ul>
-	<li><a href="#">Moderate The User</a></li>
+	<li><a href="$ApproveLink">Moderate The User</a></li>
 </ul>
 
 <p>

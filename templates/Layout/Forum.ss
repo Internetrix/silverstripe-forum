@@ -66,4 +66,36 @@
 	
 </div><!-- forum-features. -->
 
+<div class="forum-moderation">
+	<h3><a name="mod"></a>Forum Moderation</h3>
+
+	<table class="forum-topics" summary="List of topics in this forum">
+		<tr class="category">
+			<td colspan="4">Users Pending Moderation</td>
+		</tr>
+		<tr>
+			<th class="odd">Name</th>
+			<th class="odd">Nickname</th>
+			<th class="even">Email</th>
+			<th class="even"></th>
+		</tr>
+		
+		<% if PendingUsers %>
+		<% loop $PendingUsers %>
+		<tr>
+			<th class="odd">$FirstName $Surname</th>
+			<th class="odd">$Nickname</th>
+			<th class="even">$Email</th>
+			<th class="even"><a href="{$Top.AbsoluteLink}approveuser/$ID">Approve User</a><br /><a href="{$Top.AbsoluteLink}declineuser/$ID">Decline User</a></th>
+		</tr>
+		<% end_loop %>
+		<% else %>
+		<tr>
+			<th colspan="4">There are no users pending moderation.</th>
+		</tr>
+		<% end_if %>
+	
+	</table>
+</div>
+
 <% include ForumFooter %>

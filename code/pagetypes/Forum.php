@@ -308,14 +308,6 @@ class Forum extends Page {
 				->addComponent(new GridFieldPageCount('toolbar-header-right'))
 				->addComponent($pagination = new GridFieldPaginator());
 	
-			// Use GridField for Moderator management
-			$moderators = GridField::create(
-				'Moderators',
-				_t('MODERATORS', 'Moderators for this forum'),
-				$self->Moderators(),
-				$moderatorsConfig
-				);
-	
 			$columns->setDisplayFields(array(
 				'Nickname' => 'Nickname',
 				'FirstName' => 'First name',
@@ -326,8 +318,6 @@ class Forum extends Page {
 	
 			$sort->setThrowExceptionOnBadDataType(false);
 			$pagination->setThrowExceptionOnBadDataType(false);
-	
-			$fields->addFieldToTab('Root.Moderators', $moderators);
 		});
 		
 		$fields = parent::getCMSFields();
@@ -540,7 +530,8 @@ class Forum_Controller extends Page_Controller {
 		'rss',
 		'ban',
 		'ghost',
-		'approvepost'
+		'approvepost',
+		'approveuser'
 	);
 	
 	
@@ -1031,7 +1022,8 @@ class Forum_Controller extends Page_Controller {
 			$post->ThreadID = $thread->ID;
 		}
 		
-		if($this->PostsRequireModeration) {
+		// Flag the post as awaiting moderation if this forum requires posts to be moderated
+		if($this->PostsRequireModeration && !$this->canModerate()) {
 			$post->Status = "Awaiting";
 		}
 		
@@ -1383,6 +1375,24 @@ class Forum_Controller extends Page_Controller {
 		return $form;
 	}
 	
+	function PendingUsers() {
+		if (!$this->canModerate()) return;
+		
+		$awaitingapproval = new ArrayList();
+		
+		foreach($this->PosterGroups() as $group) {
+			if($group->Members()) {
+				foreach($group->Members() as $member) {
+					if(!$member->Approved) {
+						$awaitingapproval->add($member);
+					}
+				}
+			}
+		}
+		
+		return $awaitingapproval;
+	}
+	
 	/** 
 	 * Process's the moving of a given topic. Has to check for admin privledges,
 	 * passed an old topic id (post id in URL) and a new topic id
@@ -1423,6 +1433,34 @@ class Forum_Controller extends Page_Controller {
 		}
 	
 		return (Director::is_ajax()) ? true : $this->redirect($post->Link());
+	}
+	
+	// Approves posts that require moderation
+	
+	function approveuser(SS_HTTPRequest $request) {
+		$currentUser = Member::currentUser();
+		if(!isset($this->urlParams['ID'])) return $this->httpError(400);
+		if(!$this->canModerate()) return $this->httpError(403);
+	
+		// Check CSRF token
+		if (!SecurityToken::inst()->checkRequest($request)) {
+			return $this->httpError(400);
+		}
+		
+		$requestID = $this->urlParams['ID'];
+		
+		$groups = $this->PosterGroups();
+		
+		foreach($groups as $group) {
+			$member = $group->Members()->byID($requestID);
+			
+			if($member && !$member->Approved) {
+				$members  = $group->Members();
+				$members->add($member, array('Approved' => 1));
+			}
+		}
+	
+		return (Director::is_ajax()) ? true : $this->redirect($this->Link()."#mod");
 	}
 }
 

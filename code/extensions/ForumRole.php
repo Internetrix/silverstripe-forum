@@ -68,10 +68,6 @@ class ForumRole extends DataExtension {
 		'ForumPosts' => 'Post'
 	);
 
-	private static $belongs_many_many = array(
-		'ModeratedForums' => 'Forum'
-	);
-
 	private static $defaults = array(
 		'ForumRank' => 'Community Member'
 	);
@@ -98,8 +94,17 @@ class ForumRole extends DataExtension {
 	}
 
 	function ForumRank() {
-		$moderatedForums = $this->owner->ModeratedForums();
-		if($moderatedForums && $moderatedForums->Count() > 0) return _t('MODERATOR','Forum Moderator');
+		$groups = Group::get("Group", "IsForumGroup = 1");
+		
+		$moderatedForums = false;
+		
+		foreach($groups as $group) {
+			if($group->Moderators() && $group->Moderators()->byID($this->owner->ID)) {
+				$moderatedForums = true;
+			}
+		}
+
+		if($moderatedForums) return _t('MODERATOR','Forum Moderator');
 		else return $this->owner->getField('ForumRank');
 	}
 
@@ -138,18 +143,6 @@ class ForumRole extends DataExtension {
 		} else {
 			return 0;
 		}
-	}
-	
-	/**
-	 * Checks if the current user is a moderator of the
-	 * given forum by looking in the moderator ID list.
-	 *
-	 * @param Forum object to check
-	 * @return boolean
-	 */
-	function isModeratingForum($forum) {
-		$moderatorIds = $forum->Moderators() ? $forum->Moderators()->getIdList() : array();
-		return in_array($this->owner->ID, $moderatorIds);
 	}
 
 	function Link() {
@@ -250,8 +243,6 @@ class ForumRole extends DataExtension {
 
 	function updateCMSFields(FieldList $fields) {
 		$allForums = DataObject::get('Forum');
-		$fields->removeByName('ModeratedForums');
-		$fields->addFieldToTab('Root.ModeratedForums', new CheckboxSetField('ModeratedForums', _t('ForumRole.MODERATEDFORUMS', 'Moderated forums'), ($allForums->exists() ? $allForums->map('ID', 'Title') : array())));
 		$suspend = $fields->dataFieldByName('SuspendedUntil');
 		$suspend->setConfig('showcalendar', true);
 		if(Permission::checkMember($this->owner->ID, "ACCESS_FORUM")) {

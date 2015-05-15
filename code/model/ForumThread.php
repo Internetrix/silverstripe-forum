@@ -114,7 +114,9 @@ class ForumThread extends DataObject {
 	 * @return Post
 	 */
 	public function getLatestPost() {
-		return DataObject::get_one('Post', "\"ThreadID\" = '$this->ID'", true, '"ID" DESC');
+		$post = DataObject::get_one('Post', "\"ThreadID\" = '$this->ID'", true, '"ID" DESC');
+		
+		return $post;
 	}
 	
 	/**
@@ -123,7 +125,21 @@ class ForumThread extends DataObject {
 	 * @return Post
 	 */
 	function getFirstPost() {
-		return DataObject::get_one('Post', "\"ThreadID\" = '$this->ID'", true, '"ID" ASC');
+		//$post = DataObject::get_one('Post', "\"ThreadID\" = '$this->ID'", true, '"ID" ASC');
+		
+		$post = Post::get("Post", "\"ThreadID\" = '$this->ID'", "ID ASC", "", 1);
+		
+		if(!$this->canModerate()) {
+			$post = $post->filter("Status", "Moderated");
+		} else {
+			$post = $post->filter("Status", array("Moderated", "Awaiting", "Rejected"));
+		}
+		
+		if(count($post)) {
+			return $post;
+		} else {
+			return false;
+		}
 	}
 
 	/**
@@ -133,7 +149,7 @@ class ForumThread extends DataObject {
 	 * @return int
 	 */
 	function getNumPosts() {
-		return (int)DB::query("SELECT count(*) FROM \"Post\" WHERE \"ThreadID\" = $this->ID")->value();
+		return (int)DB::query("SELECT count(*) FROM \"Post\" WHERE \"ThreadID\" = $this->ID AND \"Status\" = 'Moderated'")->value();
 	}
 	
 	/**

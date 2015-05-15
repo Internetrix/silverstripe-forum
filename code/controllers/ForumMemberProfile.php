@@ -242,7 +242,7 @@ class ForumMemberProfile extends Page_Controller {
 									'Moderator' => $mod,
 									'GroupTitle' => $group->Title,
 									'NewUser' => $member,
-									'ApproveLink' => ''
+									'ApproveLink' => $group->AbsoluteLink.'#mod'
 							)));
 						
 							$email->send();
