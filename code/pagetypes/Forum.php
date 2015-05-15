@@ -539,7 +539,7 @@ class Forum_Controller extends Page_Controller {
 		parent::init();
 		if($this->redirectedTo()) return;
 
-		Requirements::javascript(THIRDPARTY_DIR . "/jquery/jquery.js"); 
+		//Requirements::javascript(THIRDPARTY_DIR . "/jquery/jquery.js"); 
 		Requirements::javascript("forum/javascript/Forum.js");
 		Requirements::javascript("forum/javascript/jquery.MultiFile.js");
 
@@ -573,6 +573,8 @@ class Forum_Controller extends Page_Controller {
 			Session::set('BackURL', $this->Link());
 		}
 	}
+	
+	
 
 	/**
 	 * A convenience function which provides nice URLs for an rss feed on this forum.
@@ -833,7 +835,7 @@ class Forum_Controller extends Page_Controller {
 
 		$fields = new FieldList(
 			($post && $post->isFirstPost() || !$thread) ? new TextField("Title", _t('Forum.FORUMTHREADTITLE', 'Title')) : new ReadonlyField('Title',  _t('Forum.FORUMTHREADTITLE', ''), 'Re:'. $thread->Title),
-			new TextareaField("Content", _t('Forum.FORUMREPLYCONTENT', 'Content')),
+			new HtmlEditorField("Content", _t('Forum.FORUMREPLYCONTENT', 'Content')),
 			new LiteralField(
 				"BBCodeHelper", 
 				"<div class=\"BBCodeHint\">[ <a href=\"#BBTagsHolder\" id=\"BBCodeHint\">" . 
@@ -845,6 +847,8 @@ class Forum_Controller extends Page_Controller {
 				_t('Forum.SUBSCRIBETOPIC','Subscribe to this topic (Receive email notifications when a new reply is added)'), 
 				($thread) ? $thread->getHasSubscribed() : false)
 		);
+		
+		
 		
 		if($thread) $fields->push(new HiddenField('ThreadID', 'ThreadID', $thread->ID));
 		if($post) $fields->push(new HiddenField('ID', 'ID', $post->ID));
