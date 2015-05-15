@@ -1393,6 +1393,14 @@ class Forum_Controller extends Page_Controller {
 		return $awaitingapproval;
 	}
 	
+	function GetApproveLink($id) {
+		$url = Controller::join_links($this->Link('approveuser'),$id);
+		$token = SecurityToken::inst();
+		$url = $token->addToUrl($url);
+		
+		return $url;
+	}
+	
 	/** 
 	 * Process's the moving of a given topic. Has to check for admin privledges,
 	 * passed an old topic id (post id in URL) and a new topic id

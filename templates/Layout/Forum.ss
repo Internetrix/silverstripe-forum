@@ -86,7 +86,7 @@
 			<th class="odd">$FirstName $Surname</th>
 			<th class="odd">$Nickname</th>
 			<th class="even">$Email</th>
-			<th class="even"><a href="{$Top.AbsoluteLink}approveuser/$ID">Approve User</a><br /><a href="{$Top.AbsoluteLink}declineuser/$ID">Decline User</a></th>
+			<th class="even"><a href="$Top.GetApproveLink($ID)">Approve User</a><br /><a href="{$Top.AbsoluteLink}declineuser/$ID">Decline User</a></th>
 		</tr>
 		<% end_loop %>
 		<% else %>
