@@ -765,9 +765,9 @@ class Forum_Controller extends Page_Controller {
 			->sort('Created', $sortDirection);
 		
 		if(!$this->canModerate()) {
-			$posts = $posts->filter('Status', array('Moderated', 'Awaiting', 'Rejected'));
-		} else {
 			$posts = $posts->filter('Status', 'Moderated');
+		} else {
+			$posts = $posts->filter('Status', array('Moderated', 'Awaiting', 'Rejected'));
 		}
 
 		if(isset($_GET['showPost']) && !isset($_GET['start'])) {
