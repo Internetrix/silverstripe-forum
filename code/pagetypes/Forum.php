@@ -1465,10 +1465,11 @@ class Forum_Controller extends Page_Controller {
 			if($member && !$member->Approved) {
 				$members  = $group->Members();
 				$members->add($member, array('Approved' => 1));
+				Session::set('ForumAdminMsg', 'The user ' .$member->Nickname. ' was approved.');
 			}
 		}
 	
-		return (Director::is_ajax()) ? true : $this->redirect($this->Link()."#mod");
+		return (Director::is_ajax()) ? true : $this->redirect($this->Link());
 	}
 }
 

@@ -1,7 +1,7 @@
 <% include ForumHeader %>
 
 <% if ForumAdminMsg %>
-	<p class="forum-message-admin">$ForumAdminMsg</p>
+	<p class="forum-message-admin" style="color: red;">$ForumAdminMsg</p>
 <% end_if %>
 
 <% if CurrentMember.isSuspended %>
