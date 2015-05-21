@@ -15,7 +15,7 @@ class ForumThread extends DataObject {
 		"IsSticky" => "Boolean",
 		"IsReadOnly" => "Boolean",
 		"IsGlobalSticky" => "Boolean",
-		"AllowMediaEmbed" => "Boolean"
+		"OverrideMediaOption" => "Boolean"
 	);
 	
 	private static $has_one = array(
@@ -31,7 +31,7 @@ class ForumThread extends DataObject {
 		'IsSticky' => false,
 		'IsReadOnly' => false,
 		'IsGlobalSticky' => false,
-		"AllowMediaEmbed" => true
+		"OverrideMediaOption" => false
 	);
 
 	private static $indexes = array(

@@ -836,8 +836,16 @@ class Forum_Controller extends Page_Controller {
 			return false;			
 		}
 		
-		// Check if we can use embed codes
-		$embedenabled = $this->AllowMediaEmbed;
+		// Get current thread
+		$id = (isset($this->urlParams['ID'])) ? $this->urlParams['ID'] : false;
+		$threadoverride = false;
+		if($id) {
+			$thread = ForumThread::get()->byID($id);
+			$threadoverride = $thread->OverrideMediaOption;
+		}
+		
+		// Check if we can use embed codes, If the override is true, then it will be disabled. If it is false, use the forum value
+		$embedenabled = ($threadoverride ? false : $this->AllowMediaEmbed);
 
 		$forumtinymce = $this->renderWith('Forum_tinymce', array('EmbedEnabled' => $embedenabled));
 
@@ -1358,9 +1366,13 @@ class Forum_Controller extends Page_Controller {
 			new CheckboxField('IsSticky', _t('Forum.ISSTICKYTHREAD','Is this a Sticky Thread?')),
 			new CheckboxField('IsGlobalSticky', _t('Forum.ISGLOBALSTICKY','Is this a Global Sticky (shown on all forums)')),
 			new CheckboxField('IsReadOnly', _t('Forum.ISREADONLYTHREAD','Is this a Read only Thread?')),
-			new CheckboxField('AllowMediaEmbed', "Allow media to be embedded in this thread?"),
 			new HiddenField("ID", "Thread")
 		);
+		
+		// Only show the Override media option if Media Embedding is allowed for this forum
+		if($this->AllowMediaEmbed) {
+			$fields->push(new CheckboxField('OverrideMediaOption', "Disable media embedding in this thead"));
+		}
 		
 		if(($forums = Forum::get()) && $forums->exists()) {
 			$fields->push(new DropdownField("ForumID", _t('Forum.CHANGETHREADFORUM',"Change Thread Forum"), $forums->map('ID', 'Title', 'Select New Category:')), '', null, 'Select New Location:');
@@ -1374,6 +1386,7 @@ class Forum_Controller extends Page_Controller {
 		
 		// need this id wrapper since the form method is called on save as 
 		// well and needs to return a valid form object
+		
 		if($id) {
 			$thread = ForumThread::get()->byID($id);
 			$form->loadDataFrom($thread);
