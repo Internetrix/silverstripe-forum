@@ -536,7 +536,8 @@ class Forum_Controller extends Page_Controller {
 		'ban',
 		'ghost',
 		'approvepost',
-		'approveuser'
+		'approveuser',
+		'denyuser'
 	);
 	
 	
@@ -1421,6 +1422,14 @@ class Forum_Controller extends Page_Controller {
 		return $url;
 	}
 	
+	function GetDenyLink($id) {
+		$url = Controller::join_links($this->Link('denyuser'),$id);
+		$token = SecurityToken::inst();
+		$url = $token->addToUrl($url);
+	
+		return $url;
+	}
+	
 	/** 
 	 * Process's the moving of a given topic. Has to check for admin privledges,
 	 * passed an old topic id (post id in URL) and a new topic id
@@ -1486,6 +1495,47 @@ class Forum_Controller extends Page_Controller {
 				$members  = $group->Members();
 				$members->add($member, array('Approved' => 1));
 				Session::set('ForumAdminMsg', 'The user ' .$member->Nickname. ' was approved.');
+			}
+		}
+	
+		return (Director::is_ajax()) ? true : $this->redirect($this->Link());
+	}
+	
+	function denyuser(SS_HTTPRequest $request) {
+		if(!isset($this->urlParams['ID'])) return $this->httpError(400);
+		if(!$this->canModerate()) return $this->httpError(403);
+	
+		// Check CSRF token
+		if (!SecurityToken::inst()->checkRequest($request)) {
+			return $this->httpError(400);
+		}
+	
+		$requestID = $this->urlParams['ID'];
+	
+		$groups = $this->PosterGroups();
+	
+		foreach($groups as $group) {
+			$member = $group->Members()->byID($requestID);
+				
+			if($member && !$member->Approved) {
+				$members  = $group->Members();
+				$members->remove($member);
+				
+				$adminEmail = Config::inst()->get('Email', 'admin_email');
+					
+				$email = new Email();
+				$email->setFrom($adminEmail);
+				$email->setTo($member->Email);
+				$email->setSubject($this->Title.": Registration Denied");
+				$email->setTemplate('ForumRegistration_NotifyUserDeclined');
+				$email->populateTemplate(new ArrayData(array(
+						'NewUser' => $member,
+						'Forum' => $this
+				)));
+					
+				$email->send();
+				
+				Session::set('ForumAdminMsg', 'The user ' .$member->Nickname. ' was denied.');
 			}
 		}
 	
