@@ -31,7 +31,7 @@
 
 	<table class="forum-topics" summary="List of topics in this forum">
 		<tr class="category">
-			<td colspan="4"><% _t('Forum_ss.THREADS', 'Threads') %></td>
+			<td colspan="3"><% _t('Forum_ss.THREADS', 'Threads') %></td>
 		</tr>
 		<tr>
 			<th class="odd"><% _t('Forum_ss.TOPIC','Topic') %></th>
