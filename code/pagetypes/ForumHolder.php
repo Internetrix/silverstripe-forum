@@ -545,6 +545,20 @@ class ForumHolder extends Page {
 	function getForumHolder() {
 		return $this;
 	}
+	
+	public function Children(){
+		$children = parent::Children();
+	
+		$request = Controller::curr()->getRequest();
+	
+		$children->unshift(ArrayData::create(array(
+				'Title' 		=> 'User Profile',
+				'MenuTitle' 	=> 'User Profile',
+				'Link'			=> $this->Parent()->Link('ForumMemberProfile/edit')
+		)));
+	
+		return $children;
+	}
 }
 
 
