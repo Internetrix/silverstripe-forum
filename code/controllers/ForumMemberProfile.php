@@ -526,8 +526,7 @@ class ForumMemberProfile extends Page_Controller {
 		$member = Member::currentUser();
 		
 		$SQL_email = Convert::raw2sql($data['Email']);
-		$forumGroup = DataObject::get_one('Group', "\"Code\" = 'forum-members'");
-		
+
 		// An existing member may have the requested email that doesn't belong to the
 		// person who is editing their profile - if so, throw an error
 		$existingMember = DataObject::get_one('Member', "\"Email\" = '$SQL_email'");
@@ -563,10 +562,6 @@ class ForumMemberProfile extends Page_Controller {
 
 		$form->saveInto($member);
 		$member->write();
-		
-		if(!$member->inGroup($forumGroup)) {
-			$forumGroup->Members()->add($member);
-		}
 
 		$member->extend('onForumUpdateProfile', $this->request);
 		
