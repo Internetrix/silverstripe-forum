@@ -25,7 +25,8 @@ class Forum extends Page {
 		"Abstract" => "Text",
 		"CanPostType" => "Enum('Inherit, Anyone, LoggedInUsers, OnlyTheseUsers, NoOne', 'Inherit')",
 		"CanAttachFiles" => "Boolean",
-		"PostsRequireModeration" => "Boolean"
+		"PostsRequireModeration" => "Boolean",
+		"AllowMediaEmbed" => "Boolean"
 	);
 
 	private static $has_one = array(
@@ -39,7 +40,8 @@ class Forum extends Page {
 	);
 
 	private static $defaults = array(
-		"ForumPosters" => "LoggedInUsers"
+		"ForumPosters" => "LoggedInUsers",
+		"AllowMediaEmbed" => true
 	);
 
 	/**
@@ -265,8 +267,9 @@ class Forum extends Page {
 			Requirements::javascript("forum/javascript/ForumAccess.js");
 			Requirements::css("forum/css/Forum_CMS.css");
 
-			$fields->addFieldToTab("Root.Access", new HeaderField(_t('Forum.ACCESSPOST','Who can view and to the forum?'), 2));
-			$fields->addFieldToTab("Root.Access", $optionSetField = new OptionsetField("CanPostType", "", array(
+			$fields->addFieldToTab("Root.ForumSettings", new HeaderField("Access Settings", 2));
+			$fields->addFieldToTab("Root.ForumSettings", new HeaderField("Who can post to the forum?", 3));
+			$fields->addFieldToTab("Root.ForumSettings", $optionSetField = new OptionsetField("CanPostType", "", array(
 				"Inherit" => "Inherit",
 				"Anyone" => _t('Forum.READANYONE', 'Anyone'),
 				"LoggedInUsers" => _t('Forum.READLOGGEDIN', 'Logged-in users'),
@@ -276,15 +279,19 @@ class Forum extends Page {
 	
 			$optionSetField->addExtraClass('ForumCanPostTypeSelector');
 	
-			$fields->addFieldsToTab("Root.Access", array( 
+			$fields->addFieldsToTab("Root.ForumSettings", array( 
 				new TreeMultiselectField("PosterGroups", _t('Forum.GROUPS',"Groups")),
-				CheckboxField::create('PostsRequireModeration', 'Posts Require Moderation'),
-				new OptionsetField("CanAttachFiles", _t('Forum.ACCESSATTACH','Can users attach files?'), array(
+				CheckboxField::create('PostsRequireModeration', 'Posts Require Moderation')
+			));
+			
+			
+			$fields->addFieldToTab("Root.ForumSettings", new HeaderField("Forum Settings", 2));
+			$fields->addFieldToTab("Root.ForumSettings", new CheckboxField("AllowMediaEmbed", "Allow Media to be embedded in posts"));
+			$fields->addFieldToTab("Root.ForumSettings", new LiteralField("AllowMediaEmbedExp", "Media includes YouTube Videos or other types of embeddable content"));
+			$fields->addFieldToTab("Root.ForumSettings", new OptionsetField("CanAttachFiles", _t('Forum.ACCESSATTACH','Can users attach files?'), array(
 					"1" => _t('Forum.YES','Yes'),
 					"0" => _t('Forum.NO','No')
-				))
-			));
-	
+				)));
 	
 			//Dropdown of forum category selection.
 			$categories = ForumCategory::get()->map();
@@ -829,10 +836,11 @@ class Forum_Controller extends Page_Controller {
 			return false;			
 		}
 
-		$forumBBCodeHint = $this->renderWith('Forum_BBCodeHint');
+		$forumtinymce = $this->renderWith('Forum_tinymce');
 
 		$fields = new FieldList(
-			($post && $post->isFirstPost() || !$thread) ? new TextField("Title", _t('Forum.FORUMTHREADTITLE', 'Title')) : new ReadonlyField('Title',  _t('Forum.FORUMTHREADTITLE', ''), 'Re:'. $thread->Title),
+			new LiteralField("tinymce", $forumtinymce),
+				($post && $post->isFirstPost() || !$thread) ? new TextField("Title", _t('Forum.FORUMTHREADTITLE', 'Title')) : new ReadonlyField('Title',  _t('Forum.FORUMTHREADTITLE', ''), 'Re:'. $thread->Title),
 			new HtmlEditorField("Content", _t('Forum.FORUMREPLYCONTENT', 'Content')),
 			new CheckboxField("TopicSubscription", 
 				_t('Forum.SUBSCRIBETOPIC','Subscribe to this topic (Receive email notifications when a new reply is added)'), 
@@ -1347,6 +1355,7 @@ class Forum_Controller extends Page_Controller {
 			new CheckboxField('IsSticky', _t('Forum.ISSTICKYTHREAD','Is this a Sticky Thread?')),
 			new CheckboxField('IsGlobalSticky', _t('Forum.ISGLOBALSTICKY','Is this a Global Sticky (shown on all forums)')),
 			new CheckboxField('IsReadOnly', _t('Forum.ISREADONLYTHREAD','Is this a Read only Thread?')),
+			new CheckboxField('AllowMediaEmbed', "Allow media to be embedded in this thread?"),
 			new HiddenField("ID", "Thread")
 		);
 		

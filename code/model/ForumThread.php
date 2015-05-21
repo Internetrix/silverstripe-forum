@@ -14,7 +14,8 @@ class ForumThread extends DataObject {
 		"NumViews" => "Int",
 		"IsSticky" => "Boolean",
 		"IsReadOnly" => "Boolean",
-		"IsGlobalSticky" => "Boolean"
+		"IsGlobalSticky" => "Boolean",
+		"AllowMediaEmbed" => "Boolean"
 	);
 	
 	private static $has_one = array(
@@ -29,7 +30,8 @@ class ForumThread extends DataObject {
 		'NumViews' => 0,
 		'IsSticky' => false,
 		'IsReadOnly' => false,
-		'IsGlobalSticky' => false
+		'IsGlobalSticky' => false,
+		"AllowMediaEmbed" => true
 	);
 
 	private static $indexes = array(
