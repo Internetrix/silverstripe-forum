@@ -47,11 +47,11 @@ class ForumHolder extends Page {
 		"HolderSubtitle" => "Welcome to our forum!",
 		"ProfileSubtitle" => "Edit Your Profile",
 		"ForumSubtitle" => "Start a new topic",
-		"HolderAbstract" => "<p>If this is your first visit, you will need to <a class=\"broken\" title=\"Click here to register\" href=\"ForumMemberProfile/register\">register</a> before you can post. However, you can browse all messages below.</p>",
+		"HolderAbstract" => "<p>If this is your first visit, you will need to <a class=\"broken\" title=\"Click here to register\" href=\"ForumMemberProfile/register\">register</a> before you can view or post in forums.</p>",
 		"ProfileAbstract" => "<p>Please fill out the fields below. You can choose whether some are publically visible by using the checkbox for each one.</p>",
 		"ForumAbstract" => "<p>From here you can start a new topic.</p>",
 		"ProfileModify" => "<p>Thanks, your member profile has been modified.</p>",
-		"ProfileAdd" => "<p>Thanks, you are now signed up to the forum.</p>",
+		"ProfileAdd" => "<p>Thanks, you are now signed up to the forum. Note, a moderator may need to approve your registration before you have access to some forums.</p>",
 	);
 	
 	/**
@@ -84,7 +84,7 @@ class ForumHolder extends Page {
 	 * @var bool If TRUE, each logged in Member who visits a Forum will write the LastViewed field
 	 * which is for the "Currently online" functionality.
 	 */
-	private static $currently_online_enabled = true;
+	private static $currently_online_enabled = false;
 
 	function getCMSFields() {
 		$self = $this;

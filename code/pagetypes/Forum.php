@@ -496,15 +496,23 @@ class Forum extends Page {
 			->addSelect('"PostMax"."PostMax"')
 			// TODO: Confirm this works in non-MySQL DBs
 			->addFrom(sprintf(
-				'LEFT JOIN (SELECT MAX("Created") AS "PostMax", "ThreadID" FROM "Post" WHERE "ForumID" = \'%s\' GROUP BY "ThreadID") AS "PostMax" ON ("PostMax"."ThreadID" = "ForumThread"."ID")',
+				'LEFT JOIN (SELECT MAX("Created") AS "PostMax", "ThreadID", "Status" FROM "Post" WHERE "ForumID" = \'%s\' GROUP BY "ThreadID") AS "PostMax" ON ("PostMax"."ThreadID" = "ForumThread"."ID")',
 				$this->ID
-			))
+			));
+		
+		if(!$this->canModerate()) {
+			$query->addWhere('"PostMax"."Status" = \'Moderated\'');
+		}
+		
+		$query
 			->addOrderBy('"PostMax"."PostMax" DESC')
 			->setDistinct(false);
+		
 
 		// Build result as ArrayList
 		$res = new ArrayList();
 		$rows = $query->execute();
+
 		if ($rows) foreach ($rows as $row) $res->push(new ForumThread($row));
 
 		return $res;
