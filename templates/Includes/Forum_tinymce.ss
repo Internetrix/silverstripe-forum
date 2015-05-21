@@ -1,5 +1,3 @@
-
-
 <script type="text/javascript">
     tinyMCE.init({ 
      theme : "advanced", 
@@ -7,7 +5,7 @@
      plugins: "media",
      theme_advanced_toolbar_location : "top", 
      theme_advanced_buttons1 : "formatselect,|,bold,italic,underline,separator,justifyleft,justifycenter,justifyright,justifyfull,separator,bullist,numlist,outdent,indent,separator,undo,redo",
-     theme_advanced_buttons2 : "media",
+     theme_advanced_buttons2 : "<% if $EmbedEnabled %>media<% end_if %>",
      theme_advanced_buttons3 : ""
     });
 

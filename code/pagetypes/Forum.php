@@ -835,8 +835,11 @@ class Forum_Controller extends Page_Controller {
  			Security::permissionFailure($this, $messageSet);
 			return false;			
 		}
+		
+		// Check if we can use embed codes
+		$embedenabled = $this->AllowMediaEmbed;
 
-		$forumtinymce = $this->renderWith('Forum_tinymce');
+		$forumtinymce = $this->renderWith('Forum_tinymce', array('EmbedEnabled' => $embedenabled));
 
 		$fields = new FieldList(
 			new LiteralField("tinymce", $forumtinymce),
