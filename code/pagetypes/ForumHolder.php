@@ -550,12 +550,22 @@ class ForumHolder extends Page {
 		$children = parent::Children();
 	
 		$request = Controller::curr()->getRequest();
-	
-		$children->unshift(ArrayData::create(array(
-				'Title' 		=> 'User Profile',
-				'MenuTitle' 	=> 'User Profile',
-				'Link'			=> $this->Parent()->Link('ForumMemberProfile/edit')
-		)));
+		$member = Member::currentUserID();
+		$baseURL = Director::BaseURL();
+		
+		if($member > 0) {
+			$children->unshift(ArrayData::create(array(
+					'Title' 		=> 'User Profile',
+					'MenuTitle' 	=> 'User Profile',
+					'Link'			=> $this->Parent()->Link('ForumMemberProfile/edit')
+			)));
+		} else {
+			$children->unshift(ArrayData::create(array(
+					'Title' 		=> 'Register',
+					'MenuTitle' 	=> 'Register',
+					'Link'			=> $this->Parent()->Link('ForumMemberProfile/register')
+			)));
+		}
 	
 		return $children;
 	}
