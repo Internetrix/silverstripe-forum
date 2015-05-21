@@ -1,7 +1,7 @@
 <?php
 class ForumPendingAdmin extends ModelAdmin {
 
-	private static $menu_icon = 'irxnews/images/icons/news_icon.png';
+	private static $menu_icon = 'forum/images/treeicons/user';
 
 	private static $title       = 'Pending Forum';
 	private static $menu_title  = 'Pending Forum';
@@ -14,7 +14,9 @@ class ForumPendingAdmin extends ModelAdmin {
 		$form = parent::getEditForm($id, $fields);
 	
 		$gridFieldName = $this->sanitiseClassName($this->modelClass);
-		$gridField = $form->Fields()->fieldByName($gridFieldName);
+		$gridFieldFields = $form->Fields();
+		
+		$gridField = $gridFieldFields->fieldByName($gridFieldName);
 	
 		// modify the list view.
 		$gridFieldConfig = $gridField->getConfig();
@@ -53,6 +55,7 @@ class ForumPendingAdmin extends ModelAdmin {
 				$gridFieldConfig->removeComponentsByType('GridFieldAddNewButton');
 				$gridFieldConfig->getComponentByType('GridFieldDataColumns')->setDisplayFields(array ('FirstName'=>'FirstName','Surname'=>'Surname','Email'=>'Email', 'Approved' => 'Approved'));
 				$gridFieldConfig->addComponent(new GridField_ApproveUserAction());
+				$gridFieldConfig->addComponent(new GridField_DenyUserAction());
 				
 				//$fields->addFieldToTab("Root.Members", HeaderField::create('Test'));
 				$fields->addFieldToTab("Root.Members", $gridField = new GridField('Members', 'Members', $members, $gridFieldConfig));
@@ -75,7 +78,7 @@ class ForumPendingAdmin extends ModelAdmin {
 		}
 		
 		if($this->modelClass == 'Group') {
-			$list = $list->filter('IsForumGroup', true);
+			$list = $list->filter(array('IsForumGroup' => true, 'UserModerationRequired' => true));
 		}
 	
 		return $list;

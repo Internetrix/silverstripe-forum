@@ -22,6 +22,7 @@ class ForumGroupExtension extends DataExtension {
 			$membersGridfield->addComponent(new GridFieldAddNewButton('toolbar-header-right'));
 			$membersGridfield->getComponentByType('GridFieldDataColumns')->setDisplayFields(array ('FirstName'=>'FirstName','Surname'=>'Surname','Email'=>'Email', 'Approved' => 'Approved'));
 			$membersGridfield->addComponent(new GridField_ApproveUserAction());
+			$membersGridfield->addComponent(new GridField_DenyUserAction());
 			
 			$config = GridFieldConfig_RelationEditor::create();
 			$fields->addFieldToTab('Root.Forum', CheckboxField::create('UserModerationRequired', 'Do Users Require Approval?'));
