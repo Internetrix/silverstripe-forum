@@ -794,10 +794,17 @@ class Forum_Controller extends Page_Controller {
 		
 		// Get current thread
 		$id = (isset($this->urlParams['ID'])) ? $this->urlParams['ID'] : false;
+		
 		$threadoverride = false;
-		if($id) {
+		
+		// If the action is editpost, the ID will be the post id. If the action is anything else, it is the forumthread id
+		
+		if($id && !(isset($this->urlParams['Action']) && $this->urlParams['Action'] == 'editpost')) {
 			$thread = ForumThread::get()->byID($id);
 			$threadoverride = $thread->OverrideMediaOption;
+		} else if(isset($this->urlParams['Action']) && $this->urlParams['Action'] == 'editpost') {
+			$post = Post::get()->byID($id);
+			$threadoverride = $post->Thread()->OverrideMediaOption;
 		}
 		
 		// Check if we can use embed codes, If the override is true, then it will be disabled. If it is false, use the forum value
