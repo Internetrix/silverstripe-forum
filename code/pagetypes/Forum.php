@@ -163,9 +163,7 @@ class Forum extends Page {
 				}
 			}
 		}
-		Debug::show($this);
-		Debug::show($groups->Count());
-		SS_Backtrace::backtrace();
+		
 		return false;
 	}
 	
@@ -836,13 +834,6 @@ class Forum_Controller extends Page_Controller {
 		$fields = new FieldList(
 			($post && $post->isFirstPost() || !$thread) ? new TextField("Title", _t('Forum.FORUMTHREADTITLE', 'Title')) : new ReadonlyField('Title',  _t('Forum.FORUMTHREADTITLE', ''), 'Re:'. $thread->Title),
 			new HtmlEditorField("Content", _t('Forum.FORUMREPLYCONTENT', 'Content')),
-			new LiteralField(
-				"BBCodeHelper", 
-				"<div class=\"BBCodeHint\">[ <a href=\"#BBTagsHolder\" id=\"BBCodeHint\">" . 
-				_t('Forum.BBCODEHINT','View Formatting Help') . 
-				"</a> ]</div>" . 
-				$forumBBCodeHint
-			),
 			new CheckboxField("TopicSubscription", 
 				_t('Forum.SUBSCRIBETOPIC','Subscribe to this topic (Receive email notifications when a new reply is added)'), 
 				($thread) ? $thread->getHasSubscribed() : false)
