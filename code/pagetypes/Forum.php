@@ -101,7 +101,7 @@ class Forum extends Page {
 	 * Check if the user can post to the forum and edit his own posts.
 	 */
 	function canPost($member = null) {
-		$this->canView($member);
+		return $this->canView($member);
 	}
 
 	/**
@@ -173,7 +173,6 @@ class Forum extends Page {
 		$self = $this;
 		
 		$this->beforeUpdateCMSFields(function($fields) use ($self) {
-			Requirements::javascript("forum/javascript/ForumAccess.js");
 			Requirements::css("forum/css/Forum_CMS.css");
 
 			$fields->addFieldToTab("Root.ForumSettings", new HeaderField("Access Settings", 2));
