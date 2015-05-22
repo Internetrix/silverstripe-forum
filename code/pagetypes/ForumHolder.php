@@ -50,7 +50,7 @@ class ForumHolder extends Page {
 		"HolderAbstract" => "<p>If this is your first visit, you will need to <a class=\"broken\" title=\"Click here to register\" href=\"ForumMemberProfile/register\">register</a> before you can view or post in forums.</p>",
 		"ProfileAbstract" => "<p>Please fill out the fields below. You can choose whether some are publically visible by using the checkbox for each one.</p>",
 		"ForumAbstract" => "<p>From here you can start a new topic.</p>",
-		"ProfileModify" => "<p>Thanks, your member profile has been modified.</p>",
+		"ProfileModify" => "<p>Thanks, your member profile has been modified. Please note that if you have requested access to new forums, a moderator may need to approve you.</p>",
 		"ProfileAdd" => "<p>Thanks, you are now signed up to the forum. Note, a moderator may need to approve your registration before you have access to some forums.</p>",
 	);
 	
@@ -319,22 +319,22 @@ class ForumHolder extends Page {
 	 * @return ArrayList
 	 */
 	function getLatestMembers($limit = 1) {
-		$groupID = DB::query('SELECT "ID" FROM "Group" WHERE "Code" = \'forum-members\'')->value();
+		$groups = $this->RegGroups()->column('ID');
 
 		// if we're just looking for a single MemberID, do a quicker query on the join table.
 		if($limit == 1) {
 			$latestMemberId = DB::query(sprintf(
 				'SELECT MAX("MemberID")
 				FROM "Group_Members"
-				WHERE "Group_Members"."GroupID" = \'%s\'',
-				$groupID
+				WHERE "Group_Members"."GroupID" IN(\'%s\')',
+				implode(',', $groups)
 			))->value();
 
 			$latestMembers = Member::get()->byId($latestMemberId);
 		} else {
 			$latestMembers = Member::get()
 				->leftJoin('Group_Members', '"Member"."ID" = "Group_Members"."MemberID"')
-				->filter('GroupID', $groupID)
+				->filter('GroupID', $groups)
 				->sort('"Member"."ID" DESC')
 				->limit($limit);
 		}
