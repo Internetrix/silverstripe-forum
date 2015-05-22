@@ -182,12 +182,26 @@ class ForumRole extends DataExtension {
 			new ConfirmedPasswordField("Password", _t('ForumRole.PASSWORD','Password')),
 			$avatarField
 		);
-		// Don't show 'forum rank' at registration
-		if(!$addmode) {
-			$personalDetailsFields->push(
-				new ReadonlyField("ForumRank", _t('ForumRole.RATING','User rating'))
-			);
+		
+		// Get Forum Groups
+		$forumGroups = DataObject::get_one("ForumHolder")->RegGroups()->map()->toArray();
+		
+		$personalDetailsFields->push(LiteralField::create('GroupsExp', 'Select which forums you\'d like to sign up to.'));
+		
+		if(count($forumGroups) > 1) {
+			$groupField = CheckboxSetField::create('ForumGroups', 'Access to Forums', $forumGroups);
+			
+			$personalDetailsFields->push($groupField);
 		}
+		
+		// Get the users forum groups and preselect the ones, but only do it when not in registration
+		if(!$addmode) {
+			$memberGroups = Member::currentUser()->Groups()->filter('IsForumGroup' , true)->column('ID'); // Only gets the IDs	
+			$groupField->setValue($memberGroups); // Set the value
+			
+			$personalDetailsFields->push(LiteralField::create('GroupsExp', 'Making changes to your forums may require approval from moderators. Removing yourself from a forum is instantaneous.'));
+		}
+
 		$personalDetailsFields->setID('PersonalDetailsFields');
 		
 		$fieldset = new FieldList(

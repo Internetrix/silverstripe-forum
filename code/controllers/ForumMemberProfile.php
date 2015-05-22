@@ -109,13 +109,6 @@ class ForumMemberProfile extends Page_Controller {
 			(isset($_POST['IdentityURL']) && !empty($_POST['IdentityURL']));
 
 		$fields = singleton('Member')->getForumFields($use_openid, true);
-		
-		// Get Forum Groups
-		$forumGroups = $this->getForumHolder()->RegGroups()->map()->toArray();
-		
-		if(count($forumGroups) > 1) {
-			$fields->push(ListboxField::create('ForumGroups', 'Access to Forums', $forumGroups)->setMultiple(true));
-		}
 
 		// If a BackURL is provided, make it hidden so the post-registration
 		// can direct to it.
@@ -220,41 +213,7 @@ class ForumMemberProfile extends Page_Controller {
 
 		// Add the member to each of the groups
 		foreach($data['ForumGroups'] as $id) {
-			$group = Group::get('Group', 'IsForumGroup = 1')->byID($id);
-			// Only add if it is a Forum Group
-			if($group) {
-				$member->Groups()->add($group->ID);
-				
-				if($group->UserModerationRequired) {
-					// Need to notify the moderators of this group
-					foreach($group->Moderators() as $mod) {
-						$modemail = $mod->Email;
-						
-						if($mod->Email){
-							$adminEmail = Config::inst()->get('Email', 'admin_email');
-						
-							$email = new Email();
-							$email->setFrom($adminEmail);
-							$email->setTo($mod->Email);
-							$email->setSubject($group->Title . ': User Requires Moderation');
-							$email->setTemplate('ForumRegistration_NotifyModerator');
-							$email->populateTemplate(new ArrayData(array(
-									'Moderator' => $mod,
-									'GroupTitle' => $group->Title,
-									'NewUser' => $member,
-									'ApproveLink' => $this->getForumHolder()->AbsoluteLink()
-							)));
-						
-							$email->send();
-						}
-					}
-				} else {
-					// User doesn't require moderation. We can auto approve them
-					$members  = $group->Members();
-					$newMember  = $members->byID($member->ID);
-					$members->add($newMember, array('Approved' => 1));
-				}
-			}
+			addMemberToGroup($id, $member);
 		}
 		
 
@@ -265,7 +224,61 @@ class ForumMemberProfile extends Page_Controller {
 		return array("Form" => ForumHolder::get()->first()->ProfileAdd);
 	}
 	
+	// Adds the member to a group, pending moderation if required
+	// addMemberToGroup(groupid, member)
+	
+	function addMemberToGroup($id, $member) {
+		$group = Group::get('Group', 'IsForumGroup = 1')->byID($id);
+		// Only add if it is a Forum Group
 
+		if($group) {
+			$member->Groups()->add($group->ID);
+			
+			
+		
+			if($group->UserModerationRequired) {
+				// Need to notify the moderators of this group
+				foreach($group->Moderators() as $mod) {
+					$modemail = $mod->Email;
+		
+					if($mod->Email){
+						$adminEmail = Config::inst()->get('Email', 'admin_email');
+		
+						$email = new Email();
+						$email->setFrom($adminEmail);
+						$email->setTo($mod->Email);
+						$email->setSubject($group->Title . ': User Requires Moderation');
+						$email->setTemplate('ForumRegistration_NotifyModerator');
+						$email->populateTemplate(new ArrayData(array(
+								'Moderator' => $mod,
+								'GroupTitle' => $group->Title,
+								'NewUser' => $member,
+								'ApproveLink' => $this->getForumHolder()->AbsoluteLink()
+						)));
+		
+						$email->send();
+					}
+				}
+			} else {
+				// User doesn't require moderation. We can auto approve them
+				$members  = $group->Members();
+				$newMember  = $members->byID($member->ID);
+				$members->add($newMember, array('Approved' => 1));
+			}
+		}
+	}
+	
+	// Adds the member to a group, pending moderation if required
+	// addMemberToGroup(groupid, member)
+	
+	function removeMemberFromGroup($id, $member) {
+		$group = Group::get('Group', 'IsForumGroup = 1')->byID($id);
+		// Only add if it is a Forum Group
+		if($group) {
+			// User doesn't require moderation. We can auto approve them
+			$group->Members()->remove($member);
+		}
+	}
 	
 
 
@@ -562,6 +575,29 @@ class ForumMemberProfile extends Page_Controller {
 
 		$form->saveInto($member);
 		$member->write();
+		
+		// See if the user needs access to new groups and remove from other groups
+		$currentGroups = $member->Groups()->filter('IsForumGroup', true)->map()->toArray(); // Only look for forum groups, could potentially remove from other security groups if not careful
+		
+		// Add to new groups
+		foreach($data['ForumGroups'] as $group) {
+			if(!array_key_exists($group, $currentGroups)) {
+				// The member doesn't exist in this group, so that means they are requesting access
+				$this->addMemberToGroup($group, $member);
+			}
+		}
+		
+		// Remove from groups	
+		foreach($currentGroups as $groupid => $group) {
+			if(!array_key_exists($groupid, $data['ForumGroups'])) {
+				// Member exists in the group but the post data didn't include it. We will assume they don't want access to this group anymore
+				$this->removeMemberFromGroup($groupid, $member);
+			}
+		}
+		
+// 		Debug::show($currentGroups->map()->toArray());
+// 		Debug::show($data['ForumGroups']);
+// 		die();
 
 		$member->extend('onForumUpdateProfile', $this->request);
 		
