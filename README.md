@@ -1,31 +1,29 @@
-# Forum Module
-
-[![Build Status](https://secure.travis-ci.org/silverstripe/silverstripe-forum.png?branch=0.8)](http://travis-ci.org/silverstripe/silverstripe-forum)
+# Forum Module (Internetrix)
 
 ## Maintainer Contact
 
- * Sean Harvey (Nickname: sharvey, halkyon) <sean (at) silverstripe (dot) com>
- * Will Rossiter (Nickname: wrossiter, willr) <will (at) silverstripe (dot) com>
- * Cam Findlay (Nickname: camfindlay) <cam (at) silverstripe (dot) com>
-
+ * Stewart Wilson <stewart.wilson (at) internetrix (dot) com (dot) au>
+ 
 ## Requirements
 
  * SilverStripe 3.1.0+
 
-## Installation & Documentation
+## Installation
 
-Please see https://github.com/silverstripe/silverstripe-forum/tree/master/docs/en
+Install the module as normal. The forum uses groups to define who can post to and moderate those forums. Create a group for each forum you create
+or it is possible for a number of forums to share the same group.
 
-## Contributing
+### Setting the groups
 
-### Translations
+* Create the groups in the Security admin, make sure you select "Is Forum Group"
+* Go to the Forum Holder page and select which groups will be shown on the registration form
+* On each Forum page, you can then select which group will control the permissions and choose "Only these people"
+* Tick "Users Require Moderation" if a moderator needs to approve membership
 
-Translations of the natural language strings are managed through a
-third party translation interface, transifex.com.
-Newly added strings will be periodically uploaded there for translation,
-and any new translations will be merged back to the project source code.
+### Post moderation
 
-Please use https://www.transifex.com/projects/p/silverstripe-forum/ to contribute translations,
-rather than sending pull requests with YAML files.
+* If the posts need moderation, tick "Posts Require Moderation" in the Forum Settings of the Forum page.
 
-See the ["i18n" topic](http://doc.silverstripe.org/framework/en/trunk/topics/i18n) on doc.silverstripe.org for more details.
+### Enable/disable embedding
+
+* You can enable/disable embedding by picking "Allow Media to be embedded in posts". It can be disabled on a per-thread basis as well in the Moderation admin (on the front end)
