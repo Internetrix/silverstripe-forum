@@ -359,7 +359,7 @@ class Forum extends Page {
 	 * @return int
 	 */
 	function getNumPosts() {
-		return DB::query(sprintf('SELECT COUNT("ID") FROM "Post" WHERE "ForumID" = \'%s\'', $this->ID))->value();
+		return DB::query(sprintf('SELECT COUNT("ID") FROM "Post" WHERE "ForumID" = \'%s\' AND "Status" = \'Moderated\'', $this->ID))->value();
 	}
 
 	/**

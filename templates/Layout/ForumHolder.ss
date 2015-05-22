@@ -2,6 +2,10 @@
 
 <table class="forum-topics">
 
+	<% if getMemberGroupCount == 0 %>
+		$NoMemberGroups
+	<% end_if %>
+
 	<% if GlobalAnnouncements %>
 		<tr class="category">
 			<td colspan="4"><% _t('ForumHolder_ss.ANNOUNCEMENTS', 'Announcements') %></td>

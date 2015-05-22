@@ -23,6 +23,7 @@ class ForumHolder extends Page {
 		"ForumAbstract" => "HTMLText", 
 		"ProfileModify" => "HTMLText", 
 		"ProfileAdd" => "HTMLText",
+		"NoMemberGroups" => "HTMLText",
 		"DisplaySignatures" => "Boolean",
 		"ShowInCategories" => "Boolean",
 		"AllowGravatars" => "Boolean",
@@ -52,6 +53,7 @@ class ForumHolder extends Page {
 		"ForumAbstract" => "<p>From here you can start a new topic.</p>",
 		"ProfileModify" => "<p>Thanks, your member profile has been modified. Please note that if you have requested access to new forums, a moderator may need to approve you.</p>",
 		"ProfileAdd" => "<p>Thanks, you are now signed up to the forum. Note, a moderator may need to approve your registration before you have access to some forums.</p>",
+		"NoMemberGroups" => "<p>You aren't a member of any forums. You can <a href=\"ForumMemberProfile/edit\">click here</a> to modify your memberships.</p>",
 	);
 	
 	/**
@@ -84,7 +86,7 @@ class ForumHolder extends Page {
 	 * @var bool If TRUE, each logged in Member who visits a Forum will write the LastViewed field
 	 * which is for the "Currently online" functionality.
 	 */
-	private static $currently_online_enabled = false;
+	private static $currently_online_enabled = true;
 
 	function getCMSFields() {
 		$self = $this;
@@ -99,7 +101,8 @@ class ForumHolder extends Page {
 				TextField::create("ForumSubtitle","Create topic Subtitle"),
 				HTMLEditorField::create("ForumAbstract","Create topic Abstract"),
 				HTMLEditorField::create("ProfileModify","Create message after modifing forum member"),
-				HTMLEditorField::create("ProfileAdd","Create message after adding forum member")
+				HTMLEditorField::create("ProfileAdd","Create message after adding forum member"),
+				HTMLEditorField::create("NoMemberGroups","Message if member is not in any groups"),
 			));
 			$fields->addFieldsToTab("Root.Settings", array(
 				CheckboxField::create("DisplaySignatures", "Display Member Signatures?"),
@@ -233,7 +236,8 @@ class ForumHolder extends Page {
 		return Post::get()
 			->innerJoin(ForumHolder::baseForumTable(),"\"Post\".\"ForumID\" = \"ForumPage\".\"ID\"" , "ForumPage")
 			->filter(array(
-				"ForumPage.ParentID" => $this->ID
+				"ForumPage.ParentID" => $this->ID,
+				"Post.Status" => "Moderated"
 			))
 			->count();
 	}
@@ -286,15 +290,7 @@ class ForumHolder extends Page {
 			return false;
 		}
 
-		$groupIDs = array();
-
-		if($forumGroup = Group::get()->filter('Code', 'forum-members')->first()) {
-			$groupIDs[] = $forumGroup->ID;
-		}
-
-		if($adminGroup = Group::get()->filter('Code', array('administrators', 'Administrators'))->first()) {
-			$groupIDs[] = $adminGroup->ID;
-		}
+		$groupIDs = $this->RegGroups()->column('ID');
 
 		return Member::get()
 			->leftJoin('Group_Members', '"Member"."ID" = "Group_Members"."MemberID"')
@@ -340,6 +336,18 @@ class ForumHolder extends Page {
 		}
 
 		return $latestMembers;
+	}
+	
+	
+	/**
+	 * Gets the count of the amount of Forum Groups the member is assigned to
+	 *
+	 * @return Int of groups
+	 */
+	function getMemberGroupCount() {
+		$memberGroups = Member::currentUser()->Groups()->filter('IsForumGroup', true);
+		
+		return count($memberGroups);
 	}
 
 	/**
