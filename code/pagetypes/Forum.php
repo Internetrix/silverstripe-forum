@@ -23,7 +23,7 @@ class Forum extends Page {
 
 	private static $db = array(
 		"Abstract" => "Text",
-		"CanPostType" => "Enum('Inherit, Anyone, LoggedInUsers, OnlyTheseUsers, NoOne', 'Inherit')",
+		"CanPostType" => "Enum('Anyone, LoggedInUsers, OnlyTheseUsers, NoOne', 'NoOne')",
 		"CanAttachFiles" => "Boolean",
 		"PostsRequireModeration" => "Boolean",
 		"AllowMediaEmbed" => "Boolean"
@@ -70,9 +70,11 @@ class Forum extends Page {
 			$member = Member::get()->byID($member);
 		}
 		
-		if($member == null) {
-			return false;
-		}
+		if($member == null) return false;
+		
+		if($this->CanPostType == "Nobody") return false;
+		if($this->CanPostType == "Anyone") return true;
+		if($this->CanPostType == "LoggedInUsers" && $member) return true;
 		
 		if($groups = $this->PosterGroups()) {
 			foreach($groups as $group) {
@@ -99,47 +101,7 @@ class Forum extends Page {
 	 * Check if the user can post to the forum and edit his own posts.
 	 */
 	function canPost($member = null) {
-		if(!$member) $member = Member::currentUser();
-
-		if($this->CanPostType == "Inherit") {
-			$holder = $this->getForumHolder();
-			if ($holder) {
-				return $holder->canPost($member);
-			}
-
-			return false;
-		}
-		
-		if($this->CanPostType == "NoOne") return false;
-
-		if($this->CanPostType == "Anyone" || $this->canEdit($member)) return true;
-		
-		if($member = Member::currentUser()) {
-			if($member->IsSuspended()) return false;
-			if($member->IsBanned()) return false;
-			
-			if($this->CanPostType == "LoggedInUsers") return true;
-
-			if($groups = $this->PosterGroups()) {
-				foreach($groups as $group) {
-					$memberGroup = $group->Members()->byID($member->ID);
-					
-					if($memberGroup) {
-						if($memberGroup->Approved) {
-							return true;
-						} else {
-							return false;
-						}
-					} else if($this->canModerate($member)) {
-						return true;
-					} else {
-						return false;
-					}
-				}
-			}
-		}
-		
-		return false;
+		$this->canView($member);
 	}
 
 	/**
@@ -215,21 +177,23 @@ class Forum extends Page {
 			Requirements::css("forum/css/Forum_CMS.css");
 
 			$fields->addFieldToTab("Root.ForumSettings", new HeaderField("Access Settings", 2));
-			$fields->addFieldToTab("Root.ForumSettings", new HeaderField("Who can post to the forum?", 3));
+			$fields->addFieldToTab("Root.ForumSettings", new HeaderField("Who can view and post to the forum?", 3));
 			$fields->addFieldToTab("Root.ForumSettings", $optionSetField = new OptionsetField("CanPostType", "", array(
-				"Inherit" => "Inherit",
 				"Anyone" => _t('Forum.READANYONE', 'Anyone'),
 				"LoggedInUsers" => _t('Forum.READLOGGEDIN', 'Logged-in users'),
 				"OnlyTheseUsers" => _t('Forum.READLIST', 'Only these people (choose from list)'),
-				"NoOne" => _t('Forum.READNOONE', 'Nobody. Make Forum Read Only')
+				"NoOne" => 'Nobody'
 			)));
-	
-			$optionSetField->addExtraClass('ForumCanPostTypeSelector');
+			
+			$groups = $self->Parent()->RegGroups()->map()->toArray();
 	
 			$fields->addFieldsToTab("Root.ForumSettings", array( 
-				new TreeMultiselectField("PosterGroups", _t('Forum.GROUPS',"Groups")),
-				CheckboxField::create('PostsRequireModeration', 'Posts Require Moderation')
+				$groupCheckboxset = new CheckboxSetField("PosterGroups", _t('Forum.GROUPS',"Groups"), $groups),
+				$moderationCheckbox = new CheckboxField('PostsRequireModeration', 'Posts Require Moderation')
 			));
+			
+			$groupCheckboxset->displayIf("CanPostType")->isEqualTo("OnlyTheseUsers");
+			$moderationCheckbox->displayIf("CanPostType")->isEqualTo("OnlyTheseUsers");
 			
 			
 			$fields->addFieldToTab("Root.ForumSettings", new HeaderField("Forum Settings", 2));
@@ -275,6 +239,14 @@ class Forum extends Page {
 		$fields = parent::getCMSFields();
 
 		return $fields;
+	}
+	
+	function onBeforeWrite() {
+		parent::onBeforeWrite();
+		
+		if($this->CanPostType != "OnlyTheseUsers" && $this->PostsRequireModeration) {
+			$this->PostsRequireModeration = 0;
+		}
 	}
 
 	/**

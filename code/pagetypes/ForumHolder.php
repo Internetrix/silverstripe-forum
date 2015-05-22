@@ -28,8 +28,7 @@ class ForumHolder extends Page {
 		"ShowInCategories" => "Boolean",
 		"AllowGravatars" => "Boolean",
 		"GravatarType" => "Varchar(10)",
-		"ForbiddenWords" => "Text",
-		"CanPostType" => "Enum('Anyone, LoggedInUsers, OnlyTheseUsers, NoOne', 'LoggedInUsers')",
+		"ForbiddenWords" => "Text"
 	);
 	
 	private static $has_one = array();
@@ -147,16 +146,11 @@ class ForumHolder extends Page {
 				LiteralField::create("FWLabel","These words will be replaced by an asterisk")
 			));
 			
-			$fields->addFieldToTab("Root.Access", HeaderField::create(_t('Forum.ACCESSPOST','Who can post to the forum?'), 2));
-			$fields->addFieldToTab("Root.Access", OptionsetField::create("CanPostType", "", array(
-				"Anyone" => _t('Forum.READANYONE', 'Anyone'),
-				"LoggedInUsers" => _t('Forum.READLOGGEDIN', 'Logged-in users'),
-				"NoOne" => _t('Forum.READNOONE', 'Nobody. Make Forum Read Only')
-			)));
-			
 			$fields->addFieldToTab("Root.Access", HeaderField::create('Show which groups on the Registration Form?'));
 			
-			$fields->addFieldToTab("Root.Access", TreeMultiselectField::create("RegGroups", "Group"));
+			$forumGroups = Group::get()->filter('IsForumGroup', true)->map()->toArray();
+			
+			$fields->addFieldToTab("Root.Access", $grouptree = new CheckboxSetField("RegGroups", "Group", $forumGroups));
 			
 		});
 		
