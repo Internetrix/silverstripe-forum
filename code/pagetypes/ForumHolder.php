@@ -339,9 +339,11 @@ class ForumHolder extends Page {
 	 * @return Int of groups
 	 */
 	function getMemberGroupCount() {
-		$memberGroups = Member::currentUser()->Groups()->filter('IsForumGroup', true);
-		
-		return count($memberGroups);
+		$member = Member::currentUser();
+		if($member){
+			$memberGroups = $member->Groups()->filter('IsForumGroup', true);
+			return count($memberGroups);
+		}
 	}
 
 	/**
