@@ -606,6 +606,42 @@ class ForumHolder_Controller extends Page_Controller {
 		}
 	}
 	
+	public function index(){
+		if($this->data()->Forums()->count()){
+			return $this;
+		}else{
+			return $this->renderWith(array('ForumHolder_unauthorized', 'Page'));
+		}
+	}
+	
+	/**
+	 * Get the selected authenticator for this request
+	 *
+	 * @return string Class name of Authenticator
+	 */
+	protected function getAuthenticator() {
+		$authenticator = $this->request->requestVar('AuthenticationMethod');
+		if($authenticator) {
+			$authenticators = Authenticator::get_authenticators();
+			if(in_array($authenticator, $authenticators)) {
+				return $authenticator;
+			}
+		} else {
+			return Authenticator::get_default_authenticator();
+		}
+	}
+	
+	/**
+	 * Get the login form to process according to the submitted data
+	 *
+	 * @return Form
+	 */
+	public function LoginForm() {
+		$authenticator = $this->getAuthenticator();
+		if($authenticator) return $authenticator::get_login_form($this);
+		throw new Exception('Passed invalid authentication method');
+	}
+	
 	/** 
 	 * Generate a complete list of all the members data. Return a 
 	 * set of all these members sorted by a GET variable
