@@ -584,6 +584,7 @@ class ForumHolder_Controller extends Page_Controller {
 		'logout',
 		'search',
 		'rss',
+		'LoginForm'
 	);
 
 	public function init() {
