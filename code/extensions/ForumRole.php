@@ -186,7 +186,7 @@ class ForumRole extends DataExtension {
 		// Get Forum Groups
 		$forumGroups = DataObject::get_one("ForumHolder")->RegGroups()->map()->toArray();
 		
-		$personalDetailsFields->push(LiteralField::create('GroupsExp', 'Select which forums you\'d like to sign up to. Please note that some forums may require approval from moderators.'));
+		$personalDetailsFields->push(LiteralField::create('GroupsExp', 'Please select which forums you\'d like to sign up to. Note that all forums will require approval from a moderator'));
 		
 		if(count($forumGroups) > 1) {
 			$groupField = CheckboxSetField::create('ForumGroups', 'Access to Forums', $forumGroups);
