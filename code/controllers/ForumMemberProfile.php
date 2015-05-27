@@ -213,7 +213,7 @@ class ForumMemberProfile extends Page_Controller {
 
 		// Add the member to each of the groups
 		foreach($data['ForumGroups'] as $id) {
-			addMemberToGroup($id, $member);
+			$this->addMemberToGroup($id, $member);
 		}
 		
 
