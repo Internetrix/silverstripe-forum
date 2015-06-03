@@ -167,7 +167,7 @@ class ForumRole extends DataExtension {
 		$avatarField->getValidator()->setAllowedExtensions(array('jpg', 'jpeg', 'gif', 'png'));
 
 		$personalDetailsFields = new CompositeField(
-			new HeaderField("PersonalDetails", _t('ForumRole.PERSONAL','Personal Details')),
+			new HeaderField("PersonalDetails", "ISPIR Forums - ".($addmode ? "New User Setup" : "User Details")),
 	
 			new LiteralField("Blurb","<p id=\"helpful\">" . _t('ForumRole.TICK', 'Tick the fields to show in public profile') . "</p>"),
 	
