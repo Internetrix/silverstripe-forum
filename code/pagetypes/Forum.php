@@ -59,6 +59,8 @@ class Forum extends Page {
 	 * @var bool
 	 */
 	static $redirect_post_urls_to_thread = false;
+	
+	public static $send_email_from = "ispir@gph.org.au";
 
 	/**
 	 * Check if the user can view the forum.

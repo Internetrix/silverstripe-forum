@@ -52,7 +52,7 @@ class GridField_DenyUserAction implements GridField_ColumnProvider, GridField_Ac
 			$newMember  = $members->byID($userid);
 			$members->remove($newMember);
 			
-			$adminEmail = Config::inst()->get('Email', 'admin_email');
+			$adminEmail = Config::inst()->get('Forum', 'send_email_from');
 				
 			$email = new Email();
 			$email->setFrom($adminEmail);

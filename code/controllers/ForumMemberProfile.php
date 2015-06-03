@@ -115,6 +115,7 @@ class ForumMemberProfile extends Page_Controller {
 		if (isset($_REQUEST['BackURL'])) $fields->push(new HiddenField('BackURL', 'BackURL', $_REQUEST['BackURL']));
 
 		$validator = singleton('Member')->getForumValidator(!$use_openid);
+		
 		$form = new Form($this, 'RegistrationForm', $fields,
 			new FieldList(new FormAction("doregister", _t('ForumMemberProfile.REGISTER','Register'))),
 			$validator
@@ -211,9 +212,11 @@ class ForumMemberProfile extends Page_Controller {
 		$member->write();
 		$member->login();
 
-		// Add the member to each of the groups
-		foreach($data['ForumGroups'] as $id) {
-			$this->addMemberToGroup($id, $member);
+		if(isset($data['ForumGroups'])) {
+			// Add the member to each of the groups
+			foreach($data['ForumGroups'] as $id) {
+				$this->addMemberToGroup($id, $member);
+			}
 		}
 		
 
@@ -242,7 +245,7 @@ class ForumMemberProfile extends Page_Controller {
 					$modemail = $mod->Email;
 		
 					if($mod->Email){
-						$adminEmail = Config::inst()->get('Email', 'admin_email');
+						$adminEmail = Config::inst()->get('Forum', 'send_email_from');
 		
 						$email = new Email();
 						$email->setFrom($adminEmail);

@@ -192,15 +192,17 @@ class ForumRole extends DataExtension {
 			$groupField = CheckboxSetField::create('ForumGroups', 'Access to Forums', $forumGroups);
 			
 			$personalDetailsFields->push($groupField);
+			
+			// Get the users forum groups and preselect the ones, but only do it when not in registration
+			if(!$addmode) {
+				$memberGroups = Member::currentUser()->Groups()->filter('IsForumGroup' , true)->column('ID'); // Only gets the IDs
+				$groupField->setValue($memberGroups); // Set the value
+					
+				$personalDetailsFields->push(LiteralField::create('GroupsExp', 'Making changes to your forums may require approval from moderators. Removing yourself from a forum is instantaneous.'));
+			}
 		}
 		
-		// Get the users forum groups and preselect the ones, but only do it when not in registration
-		if(!$addmode) {
-			$memberGroups = Member::currentUser()->Groups()->filter('IsForumGroup' , true)->column('ID'); // Only gets the IDs	
-			$groupField->setValue($memberGroups); // Set the value
-			
-			$personalDetailsFields->push(LiteralField::create('GroupsExp', 'Making changes to your forums may require approval from moderators. Removing yourself from a forum is instantaneous.'));
-		}
+		
 
 		$personalDetailsFields->setID('PersonalDetailsFields');
 		
@@ -246,9 +248,9 @@ class ForumRole extends DataExtension {
 	 */
 	function getForumValidator($needPassword = true) {
 		if ($needPassword) {
-			$validator = new RequiredFields("Nickname", "Email", "Password");
+			$validator = new RequiredFields("Nickname", "Email", "ForumGroups", "Password");
 		} else {
-			$validator = new RequiredFields("Nickname", "Email");
+			$validator = new RequiredFields("Nickname", "Email", "ForumGroups");
 		}
 		$this->owner->extend('updateForumValidator', $validator);
 
