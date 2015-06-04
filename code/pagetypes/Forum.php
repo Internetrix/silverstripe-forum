@@ -140,7 +140,8 @@ class Forum extends Page {
 	 *              not
 	 */
 	function canAttach($member = null) {
-		return $this->CanAttachFiles ? true : false;
+		//return $this->CanAttachFiles ? true : false;
+		return false;
 	}
 
 	function requireTable() {
@@ -200,10 +201,10 @@ class Forum extends Page {
 			$fields->addFieldToTab("Root.ForumSettings", new HeaderField("Forum Settings", 2));
 			$fields->addFieldToTab("Root.ForumSettings", new CheckboxField("AllowMediaEmbed", "Allow Media to be embedded in posts"));
 			$fields->addFieldToTab("Root.ForumSettings", new LiteralField("AllowMediaEmbedExp", "Media includes YouTube Videos or other types of embeddable content"));
-			$fields->addFieldToTab("Root.ForumSettings", new OptionsetField("CanAttachFiles", _t('Forum.ACCESSATTACH','Can users attach files?'), array(
-					"1" => _t('Forum.YES','Yes'),
-					"0" => _t('Forum.NO','No')
-				)));
+			//$fields->addFieldToTab("Root.ForumSettings", new OptionsetField("CanAttachFiles", _t('Forum.ACCESSATTACH','Can users attach files?'), array(
+			//		"1" => _t('Forum.YES','Yes'),
+			//		"0" => _t('Forum.NO','No')
+			//	)));
 	
 			//Dropdown of forum category selection.
 			$categories = ForumCategory::get()->map();
