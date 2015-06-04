@@ -1331,6 +1331,10 @@ class Forum_Controller extends Page_Controller {
 		return $form;
 	}
 	
+	function ShowModerateTable() {
+		return $this->canModerate();
+	}
+	
 	function PendingUsers() {
 		if (!$this->canModerate()) return;
 		

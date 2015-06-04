@@ -75,6 +75,7 @@
 		
 </div><!-- forum-features. -->
 
+<% if $ShowModerateTable %>
 <div class="forum-moderation">
 
 	<div class="large-12 column">
@@ -112,5 +113,6 @@
 	</div>	
 		
 </div>
+<% end_if %>
 
 <% include ForumFooter %>
