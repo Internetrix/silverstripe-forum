@@ -127,15 +127,15 @@ class ForumThread extends DataObject {
 	 * @return Post
 	 */
 	function getFirstPost() {
-		//$post = DataObject::get_one('Post', "\"ThreadID\" = '$this->ID'", true, '"ID" ASC');
-		
-		$post = Post::get("Post", "\"ThreadID\" = '$this->ID'", "ID ASC", "", 1);
+		$post = Post::get("Post", "\"ThreadID\" = '$this->ID'", "ID ASC", "");
 		
 		if(!$this->canModerate()) {
 			$post = $post->filter("Status", "Moderated");
 		} else {
 			$post = $post->filter("Status", array("Moderated", "Awaiting", "Rejected"));
 		}
+		
+		$post = $post->first();
 		
 		if(count($post)) {
 			return $post;

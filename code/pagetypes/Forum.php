@@ -390,7 +390,7 @@ class Forum extends Page {
 
 		// Alter the forum threads list to use the new query
 		$threads = $threads->setDataQuery(new Forum_DataQuery('ForumThread', $threadQuery));
-
+		
 		// And return the results
 		return $threads->exists() ? new PaginatedList($threads, $_GET) : null;
 	}

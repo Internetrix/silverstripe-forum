@@ -3,7 +3,7 @@
 		<a class="topic-title" href="$Link">$Title</a>
 		<p class="topic-summary">
 			<% _t('TopicListing_ss.BY','By') %>
-			<% with FirstPost %>
+				<% with FirstPost %>
 				<% with Author %>
 					<% if Link %>
 						<a href="$Link" title="<% _t('TopicListing_ss.CLICKTOUSER','Click here to view') %>"><% if Nickname %>$Nickname<% else %>Anon<% end_if %></a>
@@ -11,7 +11,7 @@
 						<span>Anon</span>
 					<% end_if %>
 				<% end_with %>
-				<% _t('TopicListing_ss.ON','on') %> $Top.Created.Long
+				<% _t('TopicListing_ss.ON','on') %> $Created.Long
 			<% end_with %>
 		</p>
 	</td>
