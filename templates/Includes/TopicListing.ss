@@ -11,7 +11,7 @@
 						<span>Anon</span>
 					<% end_if %>
 				<% end_with %>
-				<% _t('TopicListing_ss.ON','on') %> $Created.Long
+				<% _t('TopicListing_ss.ON','on') %> $Top.Created.Long
 			<% end_with %>
 		</p>
 	</td>
