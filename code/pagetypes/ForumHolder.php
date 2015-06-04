@@ -51,7 +51,7 @@ class ForumHolder extends Page {
 		"ProfileAbstract" => "<p>Please fill out the fields below. You can choose whether some are publically visible by using the checkbox for each one.</p>",
 		"ForumAbstract" => "<p>From here you can start a new topic.</p>",
 		"ProfileModify" => "<p>Thanks, your member profile has been modified. Please note that if you have requested access to new forums, a moderator may need to approve you.</p>",
-		"ProfileAdd" => "<p>Thanks, you are now signed up to the forum. Note, a moderator may need to approve your registration before you have access to some forums.</p>",
+		"ProfileAdd" => "<p>You can access the forums here.</p>",
 		"NoMemberGroups" => "<p>You aren't a member of any forums. You can <a href=\"ForumMemberProfile/edit\">click here</a> to modify your memberships.</p>",
 	);
 	
