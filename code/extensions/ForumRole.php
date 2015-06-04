@@ -179,8 +179,7 @@ class ForumRole extends DataExtension {
 			new CheckableOption('CityPublic', new TextField('City', _t('ForumRole.CITY', 'City')), true),
 			new CheckableOption("CountryPublic", new ForumCountryDropdownField("Country", _t('ForumRole.COUNTRY','Country')), true),
 			new CheckableOption("EmailPublic", new EmailField("Email", _t('ForumRole.EMAIL','Email'))),
-			new ConfirmedPasswordField("Password", _t('ForumRole.PASSWORD','Password')),
-			$avatarField
+			new ConfirmedPasswordField("Password", _t('ForumRole.PASSWORD','Password'))
 		);
 		
 		// Get Forum Groups
@@ -202,7 +201,7 @@ class ForumRole extends DataExtension {
 			}
 		}
 		
-		
+		$personalDetailsFields->push($avatarField);
 
 		$personalDetailsFields->setID('PersonalDetailsFields');
 		

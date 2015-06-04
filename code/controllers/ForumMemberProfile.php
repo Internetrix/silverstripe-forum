@@ -211,11 +211,20 @@ class ForumMemberProfile extends Page_Controller {
   		
 		$member->write();
 		$member->login();
+		
+		$approvedArray = array();
+		$needApprovalArray = array();
 
 		if(isset($data['ForumGroups'])) {
 			// Add the member to each of the groups
 			foreach($data['ForumGroups'] as $id) {
-				$this->addMemberToGroup($id, $member);
+				$approval = $this->addMemberToGroup($id, $member);
+				
+				if(!$approval[1]) {
+					$approvedArray[] = $approval[0];
+				} else {
+					$needApprovalArray[] = $approval[0];
+				}
 			}
 		}
 		
@@ -223,12 +232,23 @@ class ForumMemberProfile extends Page_Controller {
 		$member->extend('onForumRegister', $this->request);
 
 		if (isset($data['BackURL']) && $data['BackURL']) return $this->redirect($data['BackURL']);
+		
+		$text = "Thanks, you have now signed up for the ".implode(", ", $approvedArray). " forum(s).";
+		
+		if($needApprovalArray) {
+			$text .= " A moderator will need to approve your membership to the ".implode(", ", $needApprovalArray). " forum(s).";
+		}
+		
+		$defaultText = ForumHolder::get()->first()->ProfileAdd;
+		
+		$text .= ShortcodeParser::get_active()->parse($defaultText);
 
-		return array("Form" => ForumHolder::get()->first()->ProfileAdd);
+		return array("Form" => $text);
 	}
 	
 	// Adds the member to a group, pending moderation if required
 	// addMemberToGroup(groupid, member)
+	// returns array with group name and true/false if the group requres moderation
 	
 	function addMemberToGroup($id, $member) {
 		$group = Group::get('Group', 'IsForumGroup = 1')->byID($id);
@@ -236,8 +256,6 @@ class ForumMemberProfile extends Page_Controller {
 
 		if($group) {
 			$member->Groups()->add($group->ID);
-			
-			
 		
 			if($group->UserModerationRequired) {
 				// Need to notify the moderators of this group
@@ -262,11 +280,13 @@ class ForumMemberProfile extends Page_Controller {
 						$email->send();
 					}
 				}
+				return array($group->Title, true);
 			} else {
 				// User doesn't require moderation. We can auto approve them
 				$members  = $group->Members();
 				$newMember  = $members->byID($member->ID);
 				$members->add($newMember, array('Approved' => 1));
+				return array($group->Title, false);
 			}
 		}
 	}
@@ -707,5 +727,9 @@ class ForumMemberProfile extends Page_Controller {
 		}
 
 		return $tags;
+	}
+	
+	function hideHeader() {
+		return true;
 	}
 }
