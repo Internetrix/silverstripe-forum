@@ -1,6 +1,7 @@
 <script type="text/javascript">
     tinyMCE.init({ 
      theme : "advanced", 
+     content_css : "{$BaseHref}$ThemeDir/css/editor.css",
      mode: "textareas", 
      plugins: "media",
      theme_advanced_toolbar_location : "top", 
