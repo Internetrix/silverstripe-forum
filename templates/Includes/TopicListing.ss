@@ -6,9 +6,9 @@
 				<% with FirstPost %>
 				<% with Author %>
 					<% if Link %>
-						<a href="$Link" title="<% _t('TopicListing_ss.CLICKTOUSER','Click here to view') %>"><% if Nickname %>$Nickname<% else %>Anon<% end_if %></a>
+						<a href="$Link" title="<% _t('TopicListing_ss.CLICKTOUSER','Click here to view') %>"><% if Nickname %>$Nickname<% else %>Admin<% end_if %></a>
 					<% else %>
-						<span>Anon</span>
+						<span>Admin</span>
 					<% end_if %>
 				<% end_with %>
 				<% _t('TopicListing_ss.ON','on') %> $Created.Long
@@ -25,11 +25,11 @@
 				<% _t('TopicListing_ss.BY','by') %> 
 				<% with Author %>
 					<% if Link %>
-						<a href="$Link" title="<% _t('TopicListing_ss.CLICKTOUSER') %> <% if Nickname %>$Nickname.XML<% else %>Anon<% end_if %><% _t('TopicListing_ss.CLICKTOUSER2') %>">
-							<% if Nickname %>$Nickname<% else %>Anon<% end_if %>
+						<a href="$Link" title="<% _t('TopicListing_ss.CLICKTOUSER') %> <% if Nickname %>$Nickname.XML<% else %>Admin<% end_if %><% _t('TopicListing_ss.CLICKTOUSER2') %>">
+							<% if Nickname %>$Nickname<% else %>Admin<% end_if %>
 						</a>
 					<% else %>
-						<span>Anon</span>
+						<span>Admin</span>
 					<% end_if %>
 				<% end_with %> 
 				<a href="$Link" title="<% sprintf(_t('TopicListing_ss.GOTOFIRSTUNREAD','Go to the first unread post in the %s topic.'),$Title.XML) %>"><img src="forum/images/right.png" alt="" /></a>

@@ -6,7 +6,7 @@
 				<strong><% _t('ForumFooter_ss.CURRENTLYON','Currently Online:') %></strong>
 				<% if $CurrentlyOnline %>
 					<% loop CurrentlyOnline %>
-						<% if Link %><a href="$Link" title="<% if Nickname %>$Nickname<% else %>Anon<% end_if %><% _t('ISONLINE',' is online') %>"><% if Nickname %>$Nickname<% else %>Anon<% end_if %></a><% else %><span>Anon</span><% end_if %><% if Last %><% else %>,<% end_if %>
+						<% if Link %><a href="$Link" title="<% if Nickname %>$Nickname<% else %>Admin<% end_if %><% _t('ISONLINE',' is online') %>"><% if Nickname %>$Nickname<% else %>Admin<% end_if %></a><% else %><span>Admin</span><% end_if %><% if Last %><% else %>,<% end_if %>
 					<% end_loop %>
 				<% else %>
 					<span><% _t('ForumFooter_ss.NOONLINE','There is nobody online.') %></span>
@@ -18,9 +18,9 @@
 				<% if $LatestMembers(1) %>
 					<% loop $LatestMembers(1) %>
 						<% if Link %>
-							<a href="$Link" <% if Nickname %>title="$Nickname<% _t('ForumFooter_ss.ISONLINE') %>"<% end_if %>><% if Nickname %>$Nickname<% else %>Anon<% end_if %></a><% if Last %><% else %>,<% end_if %> 
+							<a href="$Link" <% if Nickname %>title="$Nickname<% _t('ForumFooter_ss.ISONLINE') %>"<% end_if %>><% if Nickname %>$Nickname<% else %>Admin<% end_if %></a><% if Last %><% else %>,<% end_if %> 
 						<% else %>
-							<span>Anon</span><% if Last %><% else %>,<% end_if %> 
+							<span>Admin</span><% if Last %><% else %>,<% end_if %> 
 						<% end_if %>
 					<% end_loop %>
 				<% end_if %>
