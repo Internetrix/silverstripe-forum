@@ -254,7 +254,7 @@ class Post extends DataObject {
 
 			$firstPost = ($this->isFirstPost()) ? ' firstPost' : '';
 
-			return '<a href="' . $url .'" class="markAsSpamLink' . $firstPost . '" rel="' . $this->ID . '">Approve Post</a>';
+			return '<a href="' . $url .'" class="approvepost' . $firstPost . '" rel="' . $this->ID . '">Approve Post</a>';
 		}
 		return false;
 	}

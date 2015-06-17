@@ -313,7 +313,13 @@ class Forum extends Page {
 	 * @return Post
 	 */
 	function getLatestPost() {
-		return Post::get()->filter('ForumID', $this->ID)->sort('"Post"."ID" DESC')->first();
+		$post = Post::get()->filter('ForumID', $this->ID);
+		
+		if(!$this->canModerate()) {
+			$post = $post->filter('Status', 'Moderated');
+		}
+		
+		return $post->sort('"Post"."ID" DESC')->first();
 	}
 
 	/**
@@ -1034,23 +1040,37 @@ class Forum_Controller extends Page_Controller {
 						$modemail = $mod->Email;
 					
 						if($mod->Email){
-							$adminEmail = Config::inst()->get('Email', 'admin_email');
+							$adminEmail = Config::inst()->get('Forum', 'send_email_from');
 					
 							$email = new Email();
 							$email->setFrom($adminEmail);
 							$email->setTo($mod->Email);
+							
 							if($starting_thread){
 								$email->setSubject($this->Title.': New thread "' . $thread->Title . '"');
 							}else{
 								$email->setSubject($this->Title.': New post "' . $post->Title. '"');
 							}
+							
 							$email->setTemplate('ForumMember_NotifyModerator');
+							
+							// Get approve link
+							$token = SecurityToken::inst();
+							
+							$approveUrl = Controller::join_links($this->Link('approvepost'),$post->ID);
+							$approveUrl = $token->addToUrl($approveUrl);
+							
+							$deleteURL = Controller::join_links($this->Link('deletepost'),$post->ID);
+							$deleteURL = $token->addToUrl($deleteURL);
+							
 							$email->populateTemplate(new ArrayData(array(
 								'NewThread' => $starting_thread,
 								'Moderator' => $moderator,
 								'Author' => $post->Author(),
 								'Forum' => $this,
-								'Post' => $post
+								'Post' => $post,
+								'ApproveURL' => $approveUrl,
+								'DeleteURL' => $deleteURL
 							)));
 					
 							$email->send();
@@ -1248,10 +1268,7 @@ class Forum_Controller extends Page_Controller {
 	 * @return bool
 	 */
 	function deletepost(SS_HTTPRequest $request) {
-		// Check CSRF token
-		if (!SecurityToken::inst()->checkRequest($request)) {
-			return $this->httpError(400);
-		}
+
 
 		if(isset($this->urlParams['ID'])) {
 			if($post = DataObject::get_by_id('Post', (int) $this->urlParams['ID'])) {
@@ -1396,11 +1413,6 @@ class Forum_Controller extends Page_Controller {
 		if(!isset($this->urlParams['ID'])) return $this->httpError(400);
 		if(!$this->canModerate()) return $this->httpError(403);
 	
-		// Check CSRF token
-		if (!SecurityToken::inst()->checkRequest($request)) {
-			return $this->httpError(400);
-		}
-	
 		$post = Post::get()->byID($this->urlParams['ID']);
 		if($post) {
 			$post->Status = 'Moderated';
@@ -1416,11 +1428,6 @@ class Forum_Controller extends Page_Controller {
 		$currentUser = Member::currentUser();
 		if(!isset($this->urlParams['ID'])) return $this->httpError(400);
 		if(!$this->canModerate()) return $this->httpError(403);
-	
-		// Check CSRF token
-		if (!SecurityToken::inst()->checkRequest($request)) {
-			return $this->httpError(400);
-		}
 		
 		$requestID = $this->urlParams['ID'];
 		
@@ -1442,11 +1449,6 @@ class Forum_Controller extends Page_Controller {
 	function denyuser(SS_HTTPRequest $request) {
 		if(!isset($this->urlParams['ID'])) return $this->httpError(400);
 		if(!$this->canModerate()) return $this->httpError(403);
-	
-		// Check CSRF token
-		if (!SecurityToken::inst()->checkRequest($request)) {
-			return $this->httpError(400);
-		}
 	
 		$requestID = $this->urlParams['ID'];
 	
