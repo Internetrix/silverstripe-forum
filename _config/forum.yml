@@ -1,6 +1,9 @@
 ---
 Name: forum
 ---
+Forum:
+  send_email_from: 'noreply@example.com'
+
 Member:
   extensions:
     ForumRole:
