@@ -54,7 +54,7 @@ class ForumHolder extends Page {
 		"ProfileModify" => "<p>Thanks, your member profile has been modified. Please note that if you have requested access to new forums, a moderator may need to approve you.</p>",
 		"ProfileAdd" => "<p>You can access the forums here.</p>",
 		"NoMemberGroups" => "<p>You aren't a member of any forums. You can <a href=\"ForumMemberProfile/edit\">click here</a> to modify your memberships.</p>",
-		"PostModeratedNotice" => "<p>Posts in this forum require to be approved by a moderator and as such, your post may not appear immediately on the forum.</p>",
+		"PostModeratedNotice" => "<p>Posts in this forum require to be approved by a moderator and as such, your post or edit may not appear immediately on the forum.</p>",
 	);
 	
 	/**

@@ -799,6 +799,13 @@ class Forum_Controller extends Page_Controller {
 				($thread) ? $thread->getHasSubscribed() : false)
 		);
 		
+		if($this->PostsRequireModeration && !$this->canModerate()) {
+			$ModNotice = $this->getForumHolder()->PostModeratedNotice;
+			
+			if($ModNotice) {
+				$fields->push(new LiteralField("ModNotice", $ModNotice));
+			}
+		}
 		
 		
 		if($thread) $fields->push(new HiddenField('ThreadID', 'ThreadID', $thread->ID));
@@ -1089,6 +1096,33 @@ class Forum_Controller extends Page_Controller {
 		}
 	}
 	
+	function notifyUserPostDeleted($post) {
+		if($post) {
+			$member = $post->Author();
+			
+			if($member->Email) {
+				// Send an email to the user
+				
+				$adminEmail = Config::inst()->get('Forum', 'send_email_from');
+					
+				$email = new Email();
+				$email->setFrom($adminEmail);
+				$email->setTo($member->Email);
+				$email->setSubject("Post Deleted Notification");
+					
+				$email->setTemplate('ForumMember_NotifyUserPostDeleted');
+					
+				$email->populateTemplate(new ArrayData(array(
+						'Author' => $member,
+						'Forum' => $this,
+						'Post' => $post
+				)));
+					
+				$email->send();
+			}
+		}
+	}
+	
 	/** 
 	 * Return the Forbidden Words in this Forum
 	 *
@@ -1281,6 +1315,11 @@ class Forum_Controller extends Page_Controller {
 		if(isset($this->urlParams['ID'])) {
 			if($post = DataObject::get_by_id('Post', (int) $this->urlParams['ID'])) {
 				if($post->canDelete()) {
+					// Notify the user that their post has been deleted
+					if($this->PostsRequireModeration) {
+						$this->notifyUserPostDeleted($post);
+					}
+					
 					// delete the whole thread if this is the first one. The delete action
 					// on thread takes care of the posts.
 					if($post->isFirstPost()) {

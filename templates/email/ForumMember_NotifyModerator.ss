@@ -5,6 +5,7 @@
 <% else %>
 	<h3>A forum post has been added or edited</h3>
 <% end_if %>
+
 <p>Username: $Author.Nickname<br />
 Date and Time: {$Post.LastEdited.Nice}</p>
 
