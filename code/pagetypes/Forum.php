@@ -1084,7 +1084,7 @@ class Forum_Controller extends Page_Controller {
 							
 							$email->populateTemplate(new ArrayData(array(
 								'NewThread' => $starting_thread,
-								'Moderator' => $moderator,
+								'Moderator' => $mod,
 								'Author' => $post->Author(),
 								'Forum' => $this,
 								'Post' => $post,
