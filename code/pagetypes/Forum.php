@@ -470,7 +470,8 @@ class Forum_Controller extends Page_Controller {
 		'ghost',
 		'approvepost',
 		'approveuser',
-		'denyuser'
+		'denyuser',
+		'revertedit'
 	);
 	
 	
@@ -1082,6 +1083,13 @@ class Forum_Controller extends Page_Controller {
 							$deleteURL = Controller::join_links($this->Link('deletepost'),$post->ID);
 							$deleteURL = $token->addToUrl($deleteURL);
 							
+							if($post->AwaitingEdit) {
+								$revertEditURL = Controller::join_links($this->Link('revertedit'),$post->ID);
+								$revertEditURL = $token->addToUrl($revertEditURL);
+							} else {
+								$revertEditURL = false;
+							}
+							
 							$email->populateTemplate(new ArrayData(array(
 								'NewThread' => $starting_thread,
 								'Moderator' => $mod,
@@ -1089,7 +1097,8 @@ class Forum_Controller extends Page_Controller {
 								'Forum' => $this,
 								'Post' => $post,
 								'ApproveURL' => $approveUrl,
-								'DeleteURL' => $deleteURL
+								'DeleteURL' => $deleteURL,
+								'RevertURL' => $revertEditURL
 							)));
 					
 							$email->send();
@@ -1590,6 +1599,24 @@ class Forum_Controller extends Page_Controller {
 		}
 	
 		return (Director::is_ajax()) ? true : $this->redirect($this->Link());
+	}
+	
+	function revertedit(SS_HTTPRequest $request) {
+		if(!isset($this->urlParams['ID'])) return $this->httpError(400);
+		if(!$this->canModerate()) return $this->httpError(403);
+		
+		$post = Post::get()->byID($this->urlParams['ID']);
+		if($post) {
+			if($post->AwaitingEdit) {
+				// This post is requiring an edit but needs to be reverted
+				$post->StagedContent = null;
+				$post->AwaitingEdit = false;
+			}
+			
+			$post->write();
+		}
+	
+		return (Director::is_ajax()) ? true : $this->redirect($post->Link());
 	}
 }
 

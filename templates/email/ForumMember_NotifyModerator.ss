@@ -13,6 +13,7 @@ Date and Time: {$Post.LastEdited.Nice}</p>
 <ul>
 	<li><a href="$Post.Link">View the Thread</a></li>
 	<li><a href="$ApproveURL">Approve Post</a></li>
+	<% if $RevertURL %><li><a href="$RevertURL">Revert Edit</a></li><% end_if %>
 	<li><a href="$DeleteURL">Delete Post</a></li>
 </ul>
 

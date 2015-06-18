@@ -50,6 +50,10 @@
 					$ApprovePostLink
 				<% end_if %>
 				
+				<% if $RevertEditLink %>
+					$RevertEditLink
+				<% end_if %>
+				
 				<% if DeleteLink %>
 					$DeleteLink
 				<% end_if %>

@@ -270,6 +270,19 @@ class Post extends DataObject {
 		return false;
 	}
 	
+	function RevertEditLink() {
+		if($this->Thread()->canModerate() && $this->AwaitingEdit) {
+			$url = Controller::join_links($this->Forum()->Link('revertedit'),$this->ID);
+			$token = SecurityToken::inst();
+			$url = $token->addToUrl($url);
+	
+			$firstPost = ($this->isFirstPost()) ? ' firstPost' : '';
+				
+			return '<a href="' . $url .'" class="revertedit' . $firstPost . '" rel="' . $this->ID . '">Revert Edit</a>';
+		}
+		return false;
+	}
+	
 	function GetApproveText() {
 		if($this->Status == 'Awaiting') {
 			return "This post requires approval";
