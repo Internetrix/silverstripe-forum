@@ -1,9 +1,9 @@
 <p>Hi $Forum.Title moderator,</p>
 
 <% if NewThread %>
-	<p><% _t('ForumMember_NotifyModerator_ss.MODERATORNEWTHREADMESSAGE', "New forum thread has been started") %>.</p>
+	<h3>New forum thread has been started.</h3>
 <% else %>
-	<p><% _t('ForumMember_NotifyModerator_ss.MODERATORNEWPOSTMESSAGE',"A forum post has been added or edited") %>.</p>
+	<h3>A forum post has been added or edited</h3>
 <% end_if %>
 <p>Username: $Author.Nickname<br />
 Date and Time: {$Post.LastEdited.Nice}</p>

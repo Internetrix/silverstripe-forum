@@ -27,7 +27,7 @@
 		
 		<% if $ApprovePostLink %>
 		<div class="approvepost" style="background: red; color: white;">
-			<p>This Post Requires Approval</p>
+			<p>$GetApproveText</p>
 		</div>
 		<% end_if %>
 		
@@ -65,6 +65,11 @@
 		<% end_if %>
 		<div class="post-type">
 			$Content.Raw
+			
+			<% if $StagedContent %>
+			<strong>The user has made the following edit to their post:</strong><br />
+			$StagedContent.Raw
+			<% end_if %>
 		</div>
 		
 		<% if Thread.DisplaySignatures %>

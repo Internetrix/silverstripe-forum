@@ -978,12 +978,20 @@ class Forum_Controller extends Page_Controller {
 		}
 		
 		// Flag the post as awaiting moderation if this forum requires posts to be moderated
-		if($this->PostsRequireModeration && !$this->canModerate()) {
+		if(!$post && $this->PostsRequireModeration && !$this->canModerate()) {
 			$post->Status = "Awaiting";
 		}
 		
 		$post->ForumID = $thread->ForumID;
-		$post->Content = $content;
+		
+		// If posts require moderation and this is an edit, Stage the edit and turn on the awaiting edit flag
+		if ($thread && $post && $this->PostsRequireModeration && !$this->canModerate()) {
+			$post->StagedContent = $content;
+			$post->AwaitingEdit = true;
+		} else {
+			$post->Content = $content;
+		}
+		
 		$post->write();
 		
 		
@@ -1017,7 +1025,7 @@ class Forum_Controller extends Page_Controller {
 			$this->notifyModerators($post, $thread);
 		}
 		
-		// Redirect to Forum 
+		// Redirect to Forum or post
 		if($this->PostsRequireModeration && !$thread) {
 			return $this->redirect($this->Link());
 		} else {
@@ -1415,6 +1423,13 @@ class Forum_Controller extends Page_Controller {
 	
 		$post = Post::get()->byID($this->urlParams['ID']);
 		if($post) {
+			if($post->AwaitingEdit) {
+				// This post is requiring an edit
+				$post->Content = $post->StagedContent;
+				$post->StagedContent = null;
+				$post->AwaitingEdit = false;
+			}
+			
 			$post->Status = 'Moderated';
 			$post->write();
 		}

@@ -24,6 +24,7 @@ class ForumHolder extends Page {
 		"ProfileModify" => "HTMLText", 
 		"ProfileAdd" => "HTMLText",
 		"NoMemberGroups" => "HTMLText",
+		"PostModeratedNotice" => "HTMLText",
 		"DisplaySignatures" => "Boolean",
 		"ShowInCategories" => "Boolean",
 		"AllowGravatars" => "Boolean",
@@ -53,6 +54,7 @@ class ForumHolder extends Page {
 		"ProfileModify" => "<p>Thanks, your member profile has been modified. Please note that if you have requested access to new forums, a moderator may need to approve you.</p>",
 		"ProfileAdd" => "<p>You can access the forums here.</p>",
 		"NoMemberGroups" => "<p>You aren't a member of any forums. You can <a href=\"ForumMemberProfile/edit\">click here</a> to modify your memberships.</p>",
+		"PostModeratedNotice" => "<p>Posts in this forum require to be approved by a moderator and as such, your post may not appear immediately on the forum.</p>",
 	);
 	
 	/**
@@ -102,6 +104,7 @@ class ForumHolder extends Page {
 				HTMLEditorField::create("ProfileModify","Create message after modifing forum member"),
 				HTMLEditorField::create("ProfileAdd","Create message after adding forum member"),
 				HTMLEditorField::create("NoMemberGroups","Message if member is not in any groups"),
+				HTMLEditorField::create("PostModeratedNotice","Message if member is not in any groups"),
 			));
 			$fields->addFieldsToTab("Root.Settings", array(
 				CheckboxField::create("DisplaySignatures", "Display Member Signatures?"),

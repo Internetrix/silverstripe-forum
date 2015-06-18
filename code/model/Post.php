@@ -11,14 +11,17 @@ class Post extends DataObject {
 	
 	private static $db = array(
 		"Content" => "Text",
+		"StagedContent" => "Text",
 		"Status" => "Enum('Awaiting, Moderated, Rejected, Archived', 'Moderated')",
+		"AwaitingEdit" => 'Boolean'
 	);
 
 	private static $casting = array(
 		"Updated" => "SS_Datetime",
 		"RSSContent" => "HTMLText",
 		"RSSAuthor" => "Varchar",
-		"Content" => "HTMLText"
+		"Content" => "HTMLText",
+		"StagedContent" => "HTMLText"
 	);
 
 	private static $has_one = array(
@@ -246,17 +249,28 @@ class Post extends DataObject {
 	 * @return String
 	 */
 	function ApprovePostLink() {
-		if($this->Thread()->canModerate() && $this->Status == 'Awaiting') {
-			$member = Member::currentUser();
+		if($this->Thread()->canModerate() && ($this->Status == 'Awaiting' || $this->AwaitingEdit)) {
 			$url = Controller::join_links($this->Forum()->Link('approvepost'),$this->ID);
 			$token = SecurityToken::inst();
 			$url = $token->addToUrl($url);
 
 			$firstPost = ($this->isFirstPost()) ? ' firstPost' : '';
+			
+			$approveType = $this->AwaitingEdit ? 'Edit' : 'Post';
 
-			return '<a href="' . $url .'" class="approvepost' . $firstPost . '" rel="' . $this->ID . '">Approve Post</a>';
+			return '<a href="' . $url .'" class="approve' . $approveType .'' . $firstPost . '" rel="' . $this->ID . '">Approve ' . $approveType .'</a>';
 		}
 		return false;
+	}
+	
+	function GetApproveText() {
+		if($this->Status == 'Awaiting') {
+			return "This post requires approval";
+		}
+		
+		if($this->AwaitingEdit) {
+			return "This post has an edit awaiting approval";
+		}
 	}
 
 	public function BanLink() {
