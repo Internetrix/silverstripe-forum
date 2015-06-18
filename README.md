@@ -27,3 +27,10 @@ or it is possible for a number of forums to share the same group.
 ### Enable/disable embedding
 
 * You can enable/disable embedding by picking "Allow Media to be embedded in posts". It can be disabled on a per-thread basis as well in the Moderation admin (on the front end)
+
+### Set Email From Address
+
+In your config.yml
+
+	Forum:
+		send_email_from: 'youremailhere@example.com'
