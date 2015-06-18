@@ -31,6 +31,13 @@
 		</div>
 		<% end_if %>
 		
+		<% if $AwaitingDelete %>
+		<div class="awaitingdelete" style="background: red; color: white;">
+			<p>Awaiting Delete by User</p>
+		</div>
+		<% end_if %>
+		
+		
 		<h4><a href="$Link">$Title <img src="forum/images/right.png" alt="Link to this post" title="Link to this post" /></a></h4>
 		<p class="post-date">$Created.Long at $Created.Time
 		<% if Updated %>

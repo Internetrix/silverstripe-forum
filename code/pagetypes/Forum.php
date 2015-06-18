@@ -912,16 +912,22 @@ class Forum_Controller extends Page_Controller {
 			'logInAgain' => _t('Forum.LOGINTOPOSTAGAIN','You have been logged out of the forums.  If you would like to log in again to post, enter a username and password below.'),
 		);
 		
+		$newPostorThread = false;
+		
 		// Creating new thread
 		if (!$thread && !$this->canPost()) {
  			Security::permissionFailure($this, $messageSet);
 			return false;			
+		}elseif(!$thread) {
+			$newPostorThread = true;
 		}
 
 		// Replying to existing thread
 		if ($thread && !$post && !$thread->canPost()) {
  			Security::permissionFailure($this, $messageSet);
 			return false;			
+		}elseif(!$post) {
+			$newPostorThread = true;
 		}
 
 		// Editing existing post
@@ -985,14 +991,14 @@ class Forum_Controller extends Page_Controller {
 		}
 		
 		// Flag the post as awaiting moderation if this forum requires posts to be moderated
-		if(!$post && $this->PostsRequireModeration && !$this->canModerate()) {
+		if($newPostorThread && $this->PostsRequireModeration && !$this->canModerate()) {
 			$post->Status = "Awaiting";
 		}
 		
 		$post->ForumID = $thread->ForumID;
 		
 		// If posts require moderation and this is an edit, Stage the edit and turn on the awaiting edit flag
-		if ($thread && $post && $this->PostsRequireModeration && !$this->canModerate()) {
+		if (!$newPostorThread && $this->PostsRequireModeration && !$this->canModerate()) {
 			$post->StagedContent = $content;
 			$post->AwaitingEdit = true;
 		} else {
@@ -1044,8 +1050,6 @@ class Forum_Controller extends Page_Controller {
 	 * Send email to moderators notifying them the thread has been created or post added/edited.
 	 */
 	function notifyModerators($post, $thread, $starting_thread = false) {
-		$moderators = $this->Moderators();
-		
 		if($groups = $this->PosterGroups()) {
 			foreach($groups as $group) {
 				$modGroup = $group->Moderators();
@@ -1119,6 +1123,46 @@ class Forum_Controller extends Page_Controller {
 				)));
 					
 				$email->send();
+			}
+		}
+	}
+	
+	function notifyModeratorsDeleteRequest($post) {
+		if($groups = $this->PosterGroups()) {
+			foreach($groups as $group) {
+				$modGroup = $group->Moderators();
+	
+				if($modGroup) { // Moderator
+					foreach($modGroup as $mod) {
+						$modemail = $mod->Email;
+							
+						if($mod->Email){
+							$adminEmail = Config::inst()->get('Forum', 'send_email_from');
+								
+							$email = new Email();
+							$email->setFrom($adminEmail);
+							$email->setTo($mod->Email);
+							$email->setSubject($this->Title.': User request to delete post');
+								
+							$email->setTemplate('ForumMember_NotifyModDelete');
+								
+							// Get approve link
+							$token = SecurityToken::inst();
+
+							$deleteURL = Controller::join_links($this->Link('deletepost'),$post->ID);
+							$deleteURL = $token->addToUrl($deleteURL);
+								
+							$email->populateTemplate(new ArrayData(array(
+									'Author' => $post->Author(),
+									'Forum' => $this,
+									'Post' => $post,
+									'DeleteURL' => $deleteURL
+							)));
+								
+							$email->send();
+						}
+					}
+				}
 			}
 		}
 	}
@@ -1314,27 +1358,39 @@ class Forum_Controller extends Page_Controller {
 
 		if(isset($this->urlParams['ID'])) {
 			if($post = DataObject::get_by_id('Post', (int) $this->urlParams['ID'])) {
+				$redirectToPost = true;
 				if($post->canDelete()) {
 					// Notify the user that their post has been deleted
-					if($this->PostsRequireModeration) {
+					if($this->PostsRequireModeration && $this->canModerate()) {
 						$this->notifyUserPostDeleted($post);
-					}
-					
-					// delete the whole thread if this is the first one. The delete action
-					// on thread takes care of the posts.
-					if($post->isFirstPost()) {
-						$thread = DataObject::get_by_id("ForumThread", $post->ThreadID);
-						$thread->delete();
-					}
-					else {
-						// delete the post
-						$post->delete();
+						$this->doDelete($post);
+					}else if($this->PostsRequireModeration && !$this->canModerate()) {
+						// Send a notification to mods that a delete is required
+						$this->notifyModeratorsDeleteRequest($post);
+						$post->AwaitingDelete = true;
+						$post->write();
+						
+						$redirectToPost = true;
+					} else {
+						// No moderation required
+						$this->doDelete($post);
 					}
 				}
 			}
 	  	}
 		
-		return (Director::is_ajax()) ? true : $this->redirect($this->Link());
+		return (Director::is_ajax()) ? true : $this->redirect(($redirectToPost ? $post->Link() : $this->Link()));
+	}
+	
+	function doDelete($post) {
+		if($post->isFirstPost()) {
+			$thread = DataObject::get_by_id("ForumThread", $post->ThreadID);
+			$thread->delete();
+		}
+		else {
+			// delete the post
+			$post->delete();
+		}
 	}
 	
 	/**

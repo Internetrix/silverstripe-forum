@@ -13,7 +13,8 @@ class Post extends DataObject {
 		"Content" => "Text",
 		"StagedContent" => "Text",
 		"Status" => "Enum('Awaiting, Moderated, Rejected, Archived', 'Moderated')",
-		"AwaitingEdit" => 'Boolean'
+		"AwaitingEdit" => 'Boolean',
+		"AwaitingDelete" => 'Boolean'
 	);
 
 	private static $casting = array(

@@ -2,7 +2,7 @@
 
 <p><strong>Post Deleted</strong></p>
 
-<p>The post titled "$Post.Title" posted to <strong>$Forum.Title</strong> has been declined and deleted.</p>
+<p>The post titled "$Post.Title" posted to <strong>$Forum.Title</strong> has been deleted.</p>
 
 <p>Kind Regards<br />
 $Forum.Title Moderators.</p>
