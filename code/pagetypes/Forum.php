@@ -914,6 +914,7 @@ class Forum_Controller extends Page_Controller {
 		);
 		
 		$newPostorThread = false;
+		$newThread = false;
 		
 		// Creating new thread
 		if (!$thread && !$this->canPost()) {
@@ -921,6 +922,7 @@ class Forum_Controller extends Page_Controller {
 			return false;			
 		}elseif(!$thread) {
 			$newPostorThread = true;
+			$newThread = true;
 		}
 
 		// Replying to existing thread
@@ -1040,10 +1042,10 @@ class Forum_Controller extends Page_Controller {
 		}
 		
 		// Redirect to Forum or post
-		if($this->PostsRequireModeration && !$thread) {
-			return $this->redirect($this->Link());
+		if($this->PostsRequireModeration && $newThread) {
+			return $this->redirect($this->Link()); // Redirect to Forum
 		} else {
-			return $this->redirect($post->Link());
+			return $this->redirect($post->Link()); // Redirect to Post
 		}
 	}
 	
