@@ -43,14 +43,14 @@
 					$ApprovePostLink
 				<% end_if %>
 				
-				<% if EditLink %>
-					$EditLink
-				<% end_if %>
-				
 				<% if DeleteLink %>
 					$DeleteLink
 				<% end_if %>
 				
+				<% if EditLink %>
+					$EditLink
+				<% end_if %>
+
 				<% if MarkAsSpamLink %>
 					$MarkAsSpamLink
 				<% end_if %>

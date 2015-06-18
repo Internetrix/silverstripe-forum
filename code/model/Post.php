@@ -190,8 +190,14 @@ class Post extends DataObject {
 			$url = $token->addToUrl($url);
 
 			$firstPost = ($this->isFirstPost()) ? ' firstPost' : '';
+			
+			if($this->Thread()->canModerate() && ($this->Status == 'Awaiting' || $this->AwaitingEdit)) {
+				$linkText = "Decline Post";
+			} else {
+				$linkText = "Delete";
+			}
 
-			return '<a class="deleteLink' . $firstPost . '" href="' . $url . '">' . _t('Post.DELETE','Delete') . '</a>';
+			return '<a class="deleteLink' . $firstPost . '" href="' . $url . '">'.$linkText.'</a>';
 		}
 		
 		return false;
