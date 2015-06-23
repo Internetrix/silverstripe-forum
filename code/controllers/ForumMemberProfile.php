@@ -218,7 +218,7 @@ class ForumMemberProfile extends Page_Controller {
 		if(isset($data['ForumGroups'])) {
 			// Add the member to each of the groups
 			foreach($data['ForumGroups'] as $id) {
-				$approval = $this->addMemberToGroup($id, $member);
+				$approval = $this->addMemberToGroup($id, $member); //and send emails to the moderators
 				
 				if(!$approval[1]) {
 					$approvedArray[] = $approval[0];
@@ -238,6 +238,20 @@ class ForumMemberProfile extends Page_Controller {
 		if($needApprovalArray) {
 			$text .= " A moderator will need to approve your membership to the ".implode(", ", $needApprovalArray). " forum(s).";
 		}
+		
+		$adminEmail = Config::inst()->get('Forum', 'send_email_from');
+		$email 		= new Email();
+		$email->setFrom($adminEmail);
+		$email->setTo($member->Email);
+		$email->setSubject('ISPIR Forum Signup');
+		$email->setTemplate('ForumRegistration_NotifyUser');
+		$email->populateTemplate(new ArrayData(array(
+			'NewUser' 	=> $member,
+			'Content' 	=> $text,
+			'BoardURL'	=> $this->getForumHolder()->AbsoluteLink()
+		)));
+		
+		$email->send();
 		
 		$defaultText = ForumHolder::get()->first()->ProfileAdd;
 		
@@ -271,10 +285,10 @@ class ForumMemberProfile extends Page_Controller {
 						$email->setSubject($group->Title . ': User Requires Moderation');
 						$email->setTemplate('ForumRegistration_NotifyModerator');
 						$email->populateTemplate(new ArrayData(array(
-								'Moderator' => $mod,
-								'GroupTitle' => $group->Title,
-								'NewUser' => $member,
-								'ApproveLink' => $this->getForumHolder()->AbsoluteLink()
+							'Moderator' 	=> $mod,
+							'GroupTitle' 	=> $group->Title,
+							'NewUser' 		=> $member,
+							'ApproveLink' 	=> $this->getForumHolder()->AbsoluteLink()
 						)));
 		
 						$email->send();
