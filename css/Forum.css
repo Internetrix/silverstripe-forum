@@ -148,7 +148,7 @@
 }
 
 .request-awaiting {
-	background: red; 
+	background: rgb(227, 37, 37); 
 	color: white;
 }
 
