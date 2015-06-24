@@ -257,7 +257,7 @@ class ForumMemberProfile extends Page_Controller {
 		
 		$text .= ShortcodeParser::get_active()->parse($defaultText);
 
-		return array("Form" => $text);
+		return array("Form" => '');
 	}
 	
 	// Adds the member to a group, pending moderation if required
