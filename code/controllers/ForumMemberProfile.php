@@ -551,6 +551,11 @@ class ForumMemberProfile extends Page_Controller {
 			$fields->push(new TextareaField('Signature', 'Forum Signature'));
 		}
 
+		if($member && $member->ID){
+			$passwordField = $fields->dataFieldByName('Password');
+			$passwordField->setCanBeEmpty(1);
+		}
+		
 		$form = new Form($this, 'EditProfileForm', $fields,
 			new FieldList(new FormAction("dosave", _t('ForumMemberProfile.SAVECHANGES','Save changes'))),
 			$validator
