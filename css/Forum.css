@@ -147,4 +147,11 @@
 .forum-footer p strong {
 }
 
+.request-awaiting {
+	background: red; 
+	color: white;
+}
 
+.request-awaiting p {
+	margin:10px;
+}

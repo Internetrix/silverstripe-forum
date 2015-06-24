@@ -26,13 +26,13 @@
 		</div>
 		
 		<% if $ApprovePostLink %>
-		<div class="approvepost" style="background: red; color: white;">
+		<div class="approvepost request-awaiting">
 			<p>$GetApproveText</p>
 		</div>
 		<% end_if %>
 		
 		<% if $AwaitingDelete %>
-		<div class="awaitingdelete" style="background: red; color: white;">
+		<div class="awaitingdelete request-awaiting">
 			<p>Awaiting Delete by User</p>
 		</div>
 		<% end_if %>
