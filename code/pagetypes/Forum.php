@@ -374,7 +374,12 @@ class Forum extends Page {
 		
 		// Only show Moderated posts for users
 		if(!$this->canModerate()) {
-			$postQuery->addWhere('"Status" IN (\'Moderated\')');
+			$member = Member::currentUser();
+			if($member && $member->ID){
+				$postQuery->addWhere('("Status" IN (\'Moderated\')) OR ("AuthorID" = '.$member->ID.')');
+			}else{
+				$postQuery->addWhere('"Status" IN (\'Moderated\')');
+			}
 		} else {
 			$postQuery->addWhere('"Status" IN (\'Moderated\', \'Awaiting\', \'Rejected\')');
 		}
@@ -700,7 +705,12 @@ class Forum_Controller extends Page_Controller {
 			->sort('Created', $sortDirection);
 		
 		if(!$this->canModerate()) {
-			$posts = $posts->filter('Status', 'Moderated');
+			$member = Member::currentUser();
+			if($member && $member->ID){
+				$posts = $posts->where('("Status" IN (\'Moderated\')) OR ("AuthorID" = '.$member->ID.')');
+			}else{
+				$posts = $posts->filter("Status", "Moderated");
+			}
 		} else {
 			$posts = $posts->filter('Status', array('Moderated', 'Awaiting', 'Rejected'));
 		}

@@ -284,15 +284,47 @@ class Post extends DataObject {
 	}
 	
 	function GetApproveText() {
+		if($this->isFirstPost()){
+			$type = 'topic';
+		}else{
+			$type = 'post';
+		}
+		
 		if($this->Status == 'Awaiting') {
-			return "This post requires approval";
+			return "This $type requires approval";
 		}
 		
 		if($this->AwaitingEdit) {
-			return "This post has an edit awaiting approval";
+			return "This $type has an edit awaiting approval";
 		}
 	}
-
+	
+	function GetApproveTextForAuthor() {
+		if($this->isFirstPost()){
+			$type = 'topics';
+		}else{
+			$type = 'posts';
+		}
+		
+		if($this->Status == 'Awaiting') {
+			return "Please note that $type in this forum require approval from a moderator.";
+		}
+		
+		if($this->AwaitingEdit) {
+		return "Please note that $type in this forum require approval from a moderator.";
+		}
+	}
+	
+	function GetAwaitingDeleteTextForAuthor(){
+		if($this->isFirstPost()){
+			$type = 'topics';
+		}else{
+			$type = 'posts';
+		}
+		
+		return "Please note that deletion of $type in this forum require approval from a moderator.";
+	}
+	
 	public function BanLink() {
 		$thread = $this->Thread();
 		if($thread->canModerate()) {
@@ -349,6 +381,15 @@ class Post extends DataObject {
 		$pos = ($start == 0 ? '' : "?start=$start") . ($count == 0 ? '' : "#post{$this->ID}");
 		
 		return ($action == "show") ? $link . $pos : $link;
+	}
+	
+	function isCurrentUserAuthor(){
+		$member = Member::currentUser();
+		if($member && $member->ID && $member->ID == $this->AuthorID){
+			return true;
+		}
+		
+		return false;
 	}
 }
 

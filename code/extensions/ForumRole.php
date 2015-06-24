@@ -91,6 +91,30 @@ class ForumRole extends DataExtension {
 		if($avatar && $avatar->exists()) {
 			$avatar->delete();
 		}
+		
+		$forumGroups = $this->owner->Groups()->filter('IsForumGroup', '1');
+		if($forumGroups && $forumGroups->Count()){
+			$this->owner->hasForumGroup = true;
+		}
+	}
+	
+	public function onAfterDelete(){
+		parent::onAfterDelete();
+		
+		if($this->owner->hasForumGroup === true){
+			$adminEmail = Config::inst()->get('Forum', 'send_email_from');
+			
+			$email = new Email();
+			$email->setFrom($adminEmail);
+			$email->setTo($this->owner->Email);
+			$email->setSubject('Account Deleted');
+			$email->setTemplate('AccountDeletion_ForgotNicknameEmail');
+			$email->populateTemplate(new ArrayData(array(
+				'Member' => $this->owner
+			)));
+			
+			$email->send();
+		}
 	}
 
 	function ForumRank() {

@@ -130,7 +130,12 @@ class ForumThread extends DataObject {
 		$post = Post::get("Post", "\"ThreadID\" = '$this->ID'", "ID ASC", "");
 		
 		if(!$this->canModerate()) {
-			$post = $post->filter("Status", "Moderated");
+			$member = Member::currentUser();
+			if($member && $member->ID){
+				$post = $post->where('("Status" IN (\'Moderated\')) OR ("AuthorID" = '.$member->ID.')');
+			}else{
+				$post = $post->filter("Status", "Moderated");
+			}
 		} else {
 			$post = $post->filter("Status", array("Moderated", "Awaiting", "Rejected"));
 		}

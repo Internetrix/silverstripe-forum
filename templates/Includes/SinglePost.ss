@@ -26,15 +26,25 @@
 		</div>
 		
 		<% if $ApprovePostLink %>
-		<div class="approvepost request-awaiting">
-			<p>$GetApproveText</p>
-		</div>
+			<div class="approvepost request-awaiting">
+				<p>$GetApproveText</p>
+			</div>
+		<% else_if isCurrentUserAuthor %>
+			<div class="approvepost request-awaiting">
+				<p>$GetApproveTextForAuthor</p>
+			</div>
 		<% end_if %>
 		
 		<% if $AwaitingDelete %>
-		<div class="awaitingdelete request-awaiting">
-			<p>Awaiting Delete by User</p>
-		</div>
+			<% if isCurrentUserAuthor %>
+				<div class="awaitingdelete request-awaiting">
+					<p>$GetAwaitingDeleteTextForAuthor</p>
+				</div>
+			<% else_if canDelete %>
+				<div class="approvepost request-awaiting">
+					<p>Awaiting Delete by User</p>
+				</div>
+			<% end_if %>
 		<% end_if %>
 		
 		
