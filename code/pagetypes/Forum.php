@@ -26,6 +26,7 @@ class Forum extends Page {
 		"CanPostType" => "Enum('Anyone, LoggedInUsers, OnlyTheseUsers, NoOne', 'NoOne')",
 		"CanAttachFiles" => "Boolean",
 		"PostsRequireModeration" => "Boolean",
+		"PostsModerationNotification" => "Boolean",
 		"AllowMediaEmbed" => "Boolean"
 	);
 
@@ -188,21 +189,25 @@ class Forum extends Page {
 			$groups = $self->Parent()->RegGroups()->map()->toArray();
 	
 			$fields->addFieldsToTab("Root.ForumSettings", array( 
-				$groupCheckboxset = new CheckboxSetField("PosterGroups", _t('Forum.GROUPS',"Groups"), $groups),
-				$moderationCheckbox = new CheckboxField('PostsRequireModeration', 'Posts Require Moderation')
+				$groupCheckboxset = new CheckboxSetField("PosterGroups", _t('Forum.GROUPS',"Groups"), $groups)
 			));
 			
 			$groupCheckboxset->displayIf("CanPostType")->isEqualTo("OnlyTheseUsers");
-			$moderationCheckbox->displayIf("CanPostType")->isEqualTo("OnlyTheseUsers");
-			
 			
 			$fields->addFieldToTab("Root.ForumSettings", new HeaderField("Forum Settings", 2));
+			$fields->addFieldsToTab("Root.ForumSettings", array(
+				$moderationCheckbox = new CheckboxField('PostsRequireModeration', 'Posts Require Moderation'),
+				CheckboxField::create('PostsModerationNotification', 'Notify user when a moderator accepts or declines a post')
+					->displayIf("PostsRequireModeration")->isChecked()->end()
+			));
 			$fields->addFieldToTab("Root.ForumSettings", new CheckboxField("AllowMediaEmbed", "Allow Media to be embedded in posts"));
 			$fields->addFieldToTab("Root.ForumSettings", new LiteralField("AllowMediaEmbedExp", "Media includes YouTube Videos or other types of embeddable content"));
 			//$fields->addFieldToTab("Root.ForumSettings", new OptionsetField("CanAttachFiles", _t('Forum.ACCESSATTACH','Can users attach files?'), array(
 			//		"1" => _t('Forum.YES','Yes'),
 			//		"0" => _t('Forum.NO','No')
 			//	)));
+			
+			$moderationCheckbox->displayIf("CanPostType")->isEqualTo("OnlyTheseUsers");
 	
 			//Dropdown of forum category selection.
 			$categories = ForumCategory::get()->map();
@@ -1115,22 +1120,30 @@ class Forum_Controller extends Page_Controller {
 		if($post) {
 			$member = $post->Author();
 			
-			if($member->Email) {
+			if($member->Email && $this->PostsModerationNotification) {
 				// Send an email to the user
 				
 				$adminEmail = Config::inst()->get('Forum', 'send_email_from');
+				
+				$msgType = Varchar::create();
+				if($post->Status == 'Moderated'){
+					$msgType->setValue('Declined');
+				}else{
+					$msgType->setValue('Deleted');
+				}
 					
 				$email = new Email();
 				$email->setFrom($adminEmail);
 				$email->setTo($member->Email);
-				$email->setSubject("Post Deleted Notification");
+				$email->setSubject("Post $msgType - " . $post->Title);
 					
 				$email->setTemplate('ForumMember_NotifyUserPostDeleted');
 					
 				$email->populateTemplate(new ArrayData(array(
-						'Author' => $member,
-						'Forum' => $this,
-						'Post' => $post
+					'Author' => $member,
+					'Forum' => $this,
+					'Post' => $post,
+					'MSGType' => $msgType
 				)));
 					
 				$email->send();
@@ -1538,6 +1551,25 @@ class Forum_Controller extends Page_Controller {
 			
 			$post->Status = 'Moderated';
 			$post->write();
+			
+			if($this->PostsModerationNotification){
+				$member = $post->Author();
+				
+				$adminEmail = Config::inst()->get('Forum', 'send_email_from');
+					
+				$email = new Email();
+				$email->setFrom($adminEmail);
+				$email->setTo($member->Email);
+				$email->setSubject('Post approved - ' . $post->Title);
+				$email->setTemplate('ForumMember_NotifyUserPostApproved');
+				$email->populateTemplate(new ArrayData(array(
+					'Author' => $member,
+					'Forum' => $this,
+					'Post' => $post
+				)));
+					
+				$email->send();
+			}
 		}
 	
 		return (Director::is_ajax()) ? true : $this->redirect($post->Link());

@@ -1,13 +1,14 @@
-<p>$Author.FirstName $Author.Surname,</p>
+<p>Hello $Author.FirstName $Author.Surname,</p>
 
-<p><strong>Post Deleted</strong></p>
+<p>You are receiving this notification because your post "$Post.Title" at <strong>$Forum.Title</strong> was $MSGType.LowerCase by a moderator.</p>
 
-<p>The post titled "$Post.Title" posted to <strong>$Forum.Title</strong> has been deleted.</p>
+<p>If you have any feedback or concerns please contact us on the email below. </p>
 
-<p>Kind Regards<br />
-$Forum.Title Moderators.</p>
+<p></p>
 
 <p>
-	This is an automated email. Please do not reply.
+Kind Regards,<br />
+The ISPIR Team<br />
+ispir@gph.org.au<br />
 </p>
 
