@@ -1560,6 +1560,21 @@ class Forum_Controller extends Page_Controller {
 			if($member && !$member->Approved) {
 				$members  = $group->Members();
 				$members->add($member, array('Approved' => 1));
+				
+				$adminEmail = Config::inst()->get('Email', 'admin_email');
+					
+				$email = new Email();
+				$email->setFrom($adminEmail);
+				$email->setTo($member->Email);
+				$email->setSubject($this->Title.": Registration Approved");
+				$email->setTemplate('ForumRegistration_NotifyUserApproved');
+				$email->populateTemplate(new ArrayData(array(
+						'NewUser' => $member,
+						'Forum' => $this
+				)));
+					
+				$email->send();
+				
 				Session::set('ForumAdminMsg', 'The user ' .$member->Nickname. ' was approved.');
 			}
 		}
@@ -1581,20 +1596,6 @@ class Forum_Controller extends Page_Controller {
 			if($member && !$member->Approved) {
 				$members  = $group->Members();
 				$members->remove($member);
-				
-				$adminEmail = Config::inst()->get('Email', 'admin_email');
-					
-				$email = new Email();
-				$email->setFrom($adminEmail);
-				$email->setTo($member->Email);
-				$email->setSubject($this->Title.": Registration Denied");
-				$email->setTemplate('ForumRegistration_NotifyUserDeclined');
-				$email->populateTemplate(new ArrayData(array(
-						'NewUser' => $member,
-						'Forum' => $this
-				)));
-					
-				$email->send();
 				
 				Session::set('ForumAdminMsg', 'The user ' .$member->Nickname. ' was denied.');
 			}
