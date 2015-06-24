@@ -1561,17 +1561,27 @@ class Forum_Controller extends Page_Controller {
 			
 			$member = $post->Author();
 			
+			if($post->isFirstPost()){
+				$postType = 'Topic';
+			}else{
+				$postType = 'Post';
+			}
+			$postTypeObj = Varchar::create();
+			$postTypeObj->setValue($postType);
+			
 			$adminEmail = Config::inst()->get('Forum', 'send_email_from');
 				
 			$email = new Email();
 			$email->setFrom($adminEmail);
 			$email->setTo($member->Email);
-			$email->setSubject('Post approved - ' . $post->Title);
+			$email->setSubject("$postType approved - " . $post->Title);
 			$email->setTemplate('ForumMember_NotifyUserPostApproved');
 			$email->populateTemplate(new ArrayData(array(
 				'Author' => $member,
 				'Forum' => $this,
-				'Post' => $post
+				'Post' => $post,
+				'PostType' => $postTypeObj,
+				'ForPost' => $postType == 'Post' ? true : false
 			)));
 				
 			$email->send();
@@ -1654,6 +1664,32 @@ class Forum_Controller extends Page_Controller {
 			}
 			
 			$post->write();
+			
+			$member = $post->Author();
+			
+			if($post->isFirstPost()){
+				$postType = 'Topic';
+			}else{
+				$postType = 'Post';
+			}
+			$postTypeObj = Varchar::create();
+			$postTypeObj->setValue($postType);
+			
+			$adminEmail = Config::inst()->get('Forum', 'send_email_from');
+				
+			$email = new Email();
+			$email->setFrom($adminEmail);
+			$email->setTo($member->Email);
+			$email->setSubject("$postType disapproved - " . $this->Title);
+			$email->setTemplate('ForumMember_NotifyUserPostDisapproved');
+			$email->populateTemplate(new ArrayData(array(
+				'Author' => $member,
+				'Forum' => $this,
+				'Post' => $post,
+				'PostType' => $postTypeObj
+			)));
+				
+			$email->send();
 		}
 	
 		return (Director::is_ajax()) ? true : $this->redirect($post->Link());
