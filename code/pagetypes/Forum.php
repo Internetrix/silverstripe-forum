@@ -26,7 +26,6 @@ class Forum extends Page {
 		"CanPostType" => "Enum('Anyone, LoggedInUsers, OnlyTheseUsers, NoOne', 'NoOne')",
 		"CanAttachFiles" => "Boolean",
 		"PostsRequireModeration" => "Boolean",
-		"PostsModerationNotification" => "Boolean",
 		"AllowMediaEmbed" => "Boolean"
 	);
 
@@ -196,9 +195,7 @@ class Forum extends Page {
 			
 			$fields->addFieldToTab("Root.ForumSettings", new HeaderField("Forum Settings", 2));
 			$fields->addFieldsToTab("Root.ForumSettings", array(
-				$moderationCheckbox = new CheckboxField('PostsRequireModeration', 'Posts Require Moderation'),
-				CheckboxField::create('PostsModerationNotification', 'Notify user when a moderator accepts or declines a post')
-					->displayIf("PostsRequireModeration")->isChecked()->end()
+				$moderationCheckbox = new CheckboxField('PostsRequireModeration', 'Posts Require Moderation')
 			));
 			$fields->addFieldToTab("Root.ForumSettings", new CheckboxField("AllowMediaEmbed", "Allow Media to be embedded in posts"));
 			$fields->addFieldToTab("Root.ForumSettings", new LiteralField("AllowMediaEmbedExp", "Media includes YouTube Videos or other types of embeddable content"));
@@ -1120,7 +1117,7 @@ class Forum_Controller extends Page_Controller {
 		if($post) {
 			$member = $post->Author();
 			
-			if($member->Email && $this->PostsModerationNotification) {
+			if($member->Email) {
 				// Send an email to the user
 				
 				$adminEmail = Config::inst()->get('Forum', 'send_email_from');
@@ -1552,24 +1549,22 @@ class Forum_Controller extends Page_Controller {
 			$post->Status = 'Moderated';
 			$post->write();
 			
-			if($this->PostsModerationNotification){
-				$member = $post->Author();
+			$member = $post->Author();
+			
+			$adminEmail = Config::inst()->get('Forum', 'send_email_from');
 				
-				$adminEmail = Config::inst()->get('Forum', 'send_email_from');
-					
-				$email = new Email();
-				$email->setFrom($adminEmail);
-				$email->setTo($member->Email);
-				$email->setSubject('Post approved - ' . $post->Title);
-				$email->setTemplate('ForumMember_NotifyUserPostApproved');
-				$email->populateTemplate(new ArrayData(array(
-					'Author' => $member,
-					'Forum' => $this,
-					'Post' => $post
-				)));
-					
-				$email->send();
-			}
+			$email = new Email();
+			$email->setFrom($adminEmail);
+			$email->setTo($member->Email);
+			$email->setSubject('Post approved - ' . $post->Title);
+			$email->setTemplate('ForumMember_NotifyUserPostApproved');
+			$email->populateTemplate(new ArrayData(array(
+				'Author' => $member,
+				'Forum' => $this,
+				'Post' => $post
+			)));
+				
+			$email->send();
 		}
 	
 		return (Director::is_ajax()) ? true : $this->redirect($post->Link());
