@@ -1561,7 +1561,7 @@ class Forum_Controller extends Page_Controller {
 				$members  = $group->Members();
 				$members->add($member, array('Approved' => 1));
 				
-				$adminEmail = Config::inst()->get('Email', 'admin_email');
+				$adminEmail = Config::inst()->get('Forum', 'send_email_from');
 					
 				$email = new Email();
 				$email->setFrom($adminEmail);
