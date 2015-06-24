@@ -1132,17 +1132,27 @@ class Forum_Controller extends Page_Controller {
 				
 				$adminEmail = Config::inst()->get('Forum', 'send_email_from');
 				
-				$msgType = Varchar::create();
-				if($post->Status == 'Moderated'){
-					$msgType->setValue('Declined');
+				if($post->isFirstPost()){
+					$postType = 'Topic';
 				}else{
-					$msgType->setValue('Deleted');
+					$postType = 'Post';
 				}
+				$postTypeObj = Varchar::create();
+				$postTypeObj->setValue($postType);
+				
+				
+				if($post->Status == 'Moderated' && $post->AwaitingDelete){
+					$ActionTypeTXT = 'deleted';
+				}else{
+					$ActionTypeTXT = 'disapproved';
+				}
+				$ActionType = Varchar::create();
+				$ActionType->setValue($ActionTypeTXT);
 					
 				$email = new Email();
 				$email->setFrom($adminEmail);
 				$email->setTo($member->Email);
-				$email->setSubject("Post $msgType - " . $post->Title);
+				$email->setSubject("$postType $ActionTypeTXT - " . $post->Title);
 					
 				$email->setTemplate('ForumMember_NotifyUserPostDeleted');
 					
@@ -1150,7 +1160,8 @@ class Forum_Controller extends Page_Controller {
 					'Author' => $member,
 					'Forum' => $this,
 					'Post' => $post,
-					'MSGType' => $msgType
+					'ActionType' => $ActionType,
+					'PostType' => $postTypeObj
 				)));
 					
 				$email->send();
