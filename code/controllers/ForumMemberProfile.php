@@ -563,7 +563,7 @@ class ForumMemberProfile extends Page_Controller {
 			&& $memberGroups
 			&& count($memberGroups)
 		){
-			$fields->push(HiddenField::create('InGroups', 'InGroups', implode(',', $memberGroups)));
+			$fields->push(HiddenField::create('DisableOptions', 'DisableOptions', implode(',', $memberGroups)));
 		}
 
 		$form = new Form($this, 'EditProfileForm', $fields,
