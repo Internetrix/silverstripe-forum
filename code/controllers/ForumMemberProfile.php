@@ -555,7 +555,17 @@ class ForumMemberProfile extends Page_Controller {
 			$passwordField = $fields->dataFieldByName('Password');
 			$passwordField->setCanBeEmpty(1);
 		}
-		
+
+		//disable existing group
+		if($member 
+			&& $member->ID 
+			&& ($memberGroups = $member->Groups()->filter('IsForumGroup' , true)->column('ID'))
+			&& $memberGroups
+			&& count($memberGroups)
+		){
+			$fields->push(HiddenField::create('InGroups', 'InGroups', implode(',', $memberGroups)));
+		}
+
 		$form = new Form($this, 'EditProfileForm', $fields,
 			new FieldList(new FormAction("dosave", _t('ForumMemberProfile.SAVECHANGES','Save changes'))),
 			$validator

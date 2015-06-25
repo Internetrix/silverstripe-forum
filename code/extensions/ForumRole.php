@@ -220,8 +220,12 @@ class ForumRole extends DataExtension {
 			if(!$addmode) {
 				$memberGroups = Member::currentUser()->Groups()->filter('IsForumGroup' , true)->column('ID'); // Only gets the IDs
 				$groupField->setValue($memberGroups); // Set the value
-					
-				$personalDetailsFields->push(LiteralField::create('GroupsExp', 'Making changes to your forums may require approval from moderators. Removing yourself from a forum is instantaneous.'));
+				
+				$emailLinkBodyMessage = 'Making changes to your forums may require approval from moderators. Removing yourself from a forum is instantaneous.';
+				
+				$this->owner->extend('updateForumFieldsGroupsExp', $emailLinkBodyMessage);
+				
+				$personalDetailsFields->push(LiteralField::create('GroupsExp', $emailLinkBodyMessage));
 			}
 		}
 		
