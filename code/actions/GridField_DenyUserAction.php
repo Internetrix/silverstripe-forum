@@ -52,25 +52,43 @@ class GridField_DenyUserAction implements GridField_ColumnProvider, GridField_Ac
 			$newMember  = $members->byID($userid);
 			$members->remove($newMember);
 			
-			$adminEmail = Config::inst()->get('Forum', 'send_email_from');
-				
-			$email = new Email();
-			$email->setFrom($adminEmail);
-			$email->setTo($newMember->Email);
-			$email->setSubject($this->Title.": Registration Denied");
-			$email->setTemplate('ForumRegistration_NotifyUserDeclined');
-			$email->populateTemplate(new ArrayData(array(
-					'NewUser' => $newMember,
-					'Forum' => $group
-			)));
-				
-			$email->send();
+			// Send an email to the user, notifying them of approval
+			$forums = Forum::get("Forum");
+			
+			foreach($forums as $forum) {
+				// Check to see if this group is for the forum
+				$forumGroups = $forum->PosterGroups();
+				$checkForGroup = $forumGroups->byID($groupID);
+
+				if($checkForGroup && $checkForGroup->UserModerationRequired) {
+					// Send an email to the user
+					$this->sendEmail($newMember, $forum);
+				}
+			}
 
 			// output a success message to the user
 			Controller::curr()->getResponse()->setStatusCode(
 			200,
 			'Member has been denied.'
 			);
+		}
+	}
+	
+	public function sendEmail($member, $forum) {
+		if($member) {
+			$adminEmail = Config::inst()->get('Forum', 'send_email_from');
+	
+			$email = new Email();
+			$email->setFrom($adminEmail);
+			$email->setTo($member->Email);
+			$email->setSubject($forum->Title.": Registration Denied");
+			$email->setTemplate('ForumRegistration_NotifyUserDeclined');
+			$email->populateTemplate(new ArrayData(array(
+					'NewUser' => $member,
+					'Forum' => $forum
+			)));
+	
+			$email->send();
 		}
 	}
 }
