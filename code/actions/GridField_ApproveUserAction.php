@@ -51,12 +51,44 @@ class GridField_ApproveUserAction implements GridField_ColumnProvider, GridField
 			$members  = $group->Members();
 			$newMember  = $members->byID($userid);
 			$members->add($newMember, array('Approved' => 1));
+			
+			// Send an email to the user, notifying them of approval
+			$forums = Forum::get("Forum");
+			
+			foreach($forums as $forum) {
+				// Check to see if this group is for the forum
+				$forumGroups = $forum->PosterGroups();
+				$checkForGroup = $forumGroups->byID($groupID);
+
+				if($checkForGroup && $checkForGroup->UserModerationRequired) {
+					// Send an email to the user
+					$this->sendEmail($newMember, $forum);
+				}
+			}
 
 			// output a success message to the user
 			Controller::curr()->getResponse()->setStatusCode(
 			200,
 			'Member has been approved.'
 			);
+		}
+	}
+	
+	public function sendEmail($member, $forum) {
+		if($member) {
+			$adminEmail = Config::inst()->get('Forum', 'send_email_from');
+				
+			$email = new Email();
+			$email->setFrom($adminEmail);
+			$email->setTo($member->Email);
+			$email->setSubject($forum->Title.": Registration Approved");
+			$email->setTemplate('ForumRegistration_NotifyUserApproved');
+			$email->populateTemplate(new ArrayData(array(
+					'NewUser' => $member,
+					'Forum' => $forum
+			)));
+				
+			$email->send();
 		}
 	}
 }
