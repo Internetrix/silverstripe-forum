@@ -43,7 +43,7 @@ class ForumMemberProfile extends Page_Controller {
 		$member = $this->Member();
 		
 		$parts[] = '<a href="' . $forumHolder->Link() . '">' . $forumHolder->Title . '</a>';
-		$nonPageParts[] = _t('ForumMemberProfile.USERPROFILE', 'User Profile');
+		$nonPageParts[] = "User Profile";
 		
 		return implode(" &raquo; ", array_reverse(array_merge($nonPageParts, $parts)));
 	}
@@ -762,6 +762,10 @@ class ForumMemberProfile extends Page_Controller {
 	}
 	
 	function hideHeader() {
+		return true;
+	}
+	
+	function hideFooter() {
 		return true;
 	}
 }
