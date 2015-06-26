@@ -233,11 +233,7 @@ class ForumMemberProfile extends Page_Controller {
 
 		if (isset($data['BackURL']) && $data['BackURL']) return $this->redirect($data['BackURL']);
 				
-		$text = "Your registration has been received and is pending.";
-		
-		if($needApprovalArray) {
-			$text .= " A moderator will need to approve your membership to the ".implode(", ", $needApprovalArray). " forum(s).";
-		}
+		$text = "Your registration has been received and is pending. A moderator will need to approve your membership to the forums.";
 		
 		$adminEmail = Config::inst()->get('Forum', 'send_email_from');
 		$email 		= new Email();
@@ -247,7 +243,6 @@ class ForumMemberProfile extends Page_Controller {
 		$email->setTemplate('ForumRegistration_NotifyUser');
 		$email->populateTemplate(new ArrayData(array(
 			'NewUser' 	=> $member,
-			'Content' 	=> $text,
 			'BoardURL'	=> $this->getForumHolder()->AbsoluteLink()
 		)));
 		
