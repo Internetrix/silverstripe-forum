@@ -232,8 +232,8 @@ class ForumMemberProfile extends Page_Controller {
 		$member->extend('onForumRegister', $this->request);
 
 		if (isset($data['BackURL']) && $data['BackURL']) return $this->redirect($data['BackURL']);
-		
-		$text = "Thanks, you have now signed up for the ".implode(", ", $approvedArray). " forum(s).";
+				
+		$text = "Your registration has been received and is pending.";
 		
 		if($needApprovalArray) {
 			$text .= " A moderator will need to approve your membership to the ".implode(", ", $needApprovalArray). " forum(s).";
@@ -256,8 +256,15 @@ class ForumMemberProfile extends Page_Controller {
 		$defaultText = ForumHolder::get()->first()->ProfileAdd;
 		
 		$text .= ShortcodeParser::get_active()->parse($defaultText);
+		
+		// Log the member out
+		$member = Member::currentUser();
+		if($member) $member->logOut();
+		Session::clear_all();
+		
+		// Return the message
 
-		return array("Form" => '');
+		return array("Form" => $text);
 	}
 	
 	// Adds the member to a group, pending moderation if required
