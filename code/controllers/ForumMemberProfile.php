@@ -253,10 +253,6 @@ class ForumMemberProfile extends Page_Controller {
 		
 		$email->send();
 		
-		$defaultText = ForumHolder::get()->first()->ProfileAdd;
-		
-		$text .= ShortcodeParser::get_active()->parse($defaultText);
-		
 		// Log the member out
 		$member = Member::currentUser();
 		if($member) $member->logOut();

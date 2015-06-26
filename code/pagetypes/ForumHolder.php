@@ -22,7 +22,6 @@ class ForumHolder extends Page {
 		"ProfileAbstract" => "HTMLText", 
 		"ForumAbstract" => "HTMLText", 
 		"ProfileModify" => "HTMLText", 
-		"ProfileAdd" => "HTMLText",
 		"NoMemberGroups" => "HTMLText",
 		"PostModeratedNotice" => "HTMLText",
 		"DisplaySignatures" => "Boolean",
@@ -102,7 +101,6 @@ class ForumHolder extends Page {
 				TextField::create("ForumSubtitle","Create topic Subtitle"),
 				HTMLEditorField::create("ForumAbstract","Create topic Abstract"),
 				HTMLEditorField::create("ProfileModify","Create message after modifing forum member"),
-				HTMLEditorField::create("ProfileAdd","Create message after adding forum member"),
 				HTMLEditorField::create("NoMemberGroups","Message if member is not in any groups"),
 				HTMLEditorField::create("PostModeratedNotice","Message if member is not in any groups"),
 			));
