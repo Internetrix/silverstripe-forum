@@ -132,25 +132,25 @@ class ForumRole extends DataExtension {
 		else return $this->owner->getField('ForumRank');
 	}
 
-	function FirstNamePublic() {
+	function isFirstNamePublic() {
 		return $this->owner->FirstNamePublic || Permission::check('ADMIN');
 	}
-	function SurnamePublic() {
+	function isSurnamePublic() {
 		return $this->owner->SurnamePublic || Permission::check('ADMIN');
 	}
-	function OccupationPublic() {
+	function isOccupationPublic() {
 		return $this->owner->OccupationPublic || Permission::check('ADMIN');
 	}
-	function CompanyPublic() {
+	function isCompanyPublic() {
 		return $this->owner->CompanyPublic || Permission::check('ADMIN');
 	}
-	function CityPublic() {
+	function isCityPublic() {
 		return $this->owner->CityPublic || Permission::check('ADMIN');
 	}
-	function CountryPublic() {
+	function isCountryPublic() {
 		return $this->owner->CountryPublic || Permission::check('ADMIN');
 	}
-	function EmailPublic() {
+	function isEmailPublic() {
 		return $this->owner->EmailPublic || Permission::check('ADMIN');
 	}
 	/**

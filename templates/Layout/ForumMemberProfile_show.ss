@@ -11,25 +11,25 @@
 					</p>
 				<% end_if %>
 				<div id="ForumProfileNickname"><label class="left"><% _t('ForumMemberProfile_show_ss.NICKNAME','Nickname') %>:</label> <p class="readonly"><% if Nickname %>$Nickname<% else %>Anon<% end_if %></p></div>
-				<% if FirstNamePublic %>
+				<% if isFirstNamePublic %>
 				<div id="ForumProfileFirstname"><label class="left"><% _t('ForumMemberProfile_show_ss.FIRSTNAME','First Name') %>:</label> <p class="readonly">$FirstName</p></div>
 				<% end_if %>
-				<% if SurnamePublic %>
+				<% if isSurnamePublic %>
 				<div id="ForumProfileSurname"><label class="left"><% _t('ForumMemberProfile_show_ss.SURNAME','Surname') %>:</label> <p class="readonly">$Surname</p></div>
 				<% end_if %>
-				<% if EmailPublic %>
+				<% if isEmailPublic %>
 				<div id="ForumProfileEmail"><label class="left"><% _t('ForumMemberProfile_show_ss.EMAIL','Email') %>:</label> <p class="readonly"><a href="mailto:$Email">$Email</a></p></div>
 				<% end_if %>
-				<% if OccupationPublic %>
+				<% if isOccupationPublic %>
 				<div id="ForumProfileOccupation"><label class="left"><% _t('ForumMemberProfile_show_ss.OCCUPATION','Occupation') %>:</label> <p class="readonly">$Occupation</p></div>
 				<% end_if %>
-				<% if CompanyPublic %>
+				<% if isCompanyPublic %>
 				<div id="ForumProfileCompany"><label class="left"><% _t('ForumMemberProfile_show_ss.COMPANY', 'Company') %>:</label> <p class="readonly">$Company</p></div>
 				<% end_if %>
-				<% if CityPublic %>
+				<% if isCityPublic %>
 				<div id="ForumProfileCity"><label class="left"><% _t('ForumMemberProfile_show_ss.CITY','City') %>:</label> <p class="readonly">$City</p></div>
 				<% end_if %>
-				<% if CountryPublic %>
+				<% if isCountryPublic %>
 				<div id="ForumProfileCountry"><label class="left"><% _t('ForumMemberProfile_show_ss.COUNTRY','Country') %>:</label> <p class="readonly">$FullCountry</p></div>
 				<% end_if %>
 				<div id="ForumProfilePosts"><label class="left"><% _t('ForumMemberProfile_show_ss.POSTNO','Number of posts') %>:</label> <p class="readonly">$NumPosts</p></div>
