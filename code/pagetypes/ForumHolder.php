@@ -629,7 +629,7 @@ class ForumHolder_Controller extends Page_Controller {
 				return $authenticator;
 			}
 		} else {
-			return Authenticator::get_default_authenticator();
+			return Config::inst()->get('Authenticator', 'default_authenticator');
 		}
 	}
 	
