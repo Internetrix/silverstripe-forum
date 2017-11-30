@@ -2,7 +2,9 @@
 
 language: php
 
-php: 
+sudo: false
+
+php:
   - 5.4
 
 env:
@@ -11,7 +13,7 @@ env:
   matrix:
     - DB=MYSQL
     - DB=SQLITE
-    - DB=PGSQL 
+    - DB=PGSQL
 
 matrix:
   allow_failures:
@@ -28,10 +30,10 @@ matrix:
       env: DB=MYSQL CORE_RELEASE=3.1
 
 before_script:
- - composer self-update
+ - composer self-update || true
  - git clone git://github.com/silverstripe-labs/silverstripe-travis-support.git ~/travis-support
  - php ~/travis-support/travis_setup.php --source `pwd` --target ~/builds/ss
  - cd ~/builds/ss
 
-script: 
- - phpunit forum/tests/
+script:
+ - vendor/bin/phpunit forum/tests/
