@@ -1,7 +1,7 @@
 <?php
 /**
  * ForumMemberProfile is the profile pages for a given ForumMember
- * 
+ *
  * @package forum
  */
 class ForumMemberProfile extends Page_Controller {
@@ -18,7 +18,7 @@ class ForumMemberProfile extends Page_Controller {
 		'thanks',
 	);
 
-	public $URLSegment = "ForumMemberProfile"; 
+	public $URLSegment = "ForumMemberProfile";
 
 	/**
 	 * Return a set of {@link Forum} objects that
@@ -30,7 +30,7 @@ class ForumMemberProfile extends Page_Controller {
 		$member = $this->Member();
 		return $member ? $member->ModeratedForums() : null;
 	}
-	
+
 	/**
 	 * Create breadcrumbs (just shows a forum holder link and name of user)
 	 * @return string HTML code to display breadcrumbs
@@ -41,13 +41,13 @@ class ForumMemberProfile extends Page_Controller {
 
 		$forumHolder = $this->getForumHolder();
 		$member = $this->Member();
-		
+
 		$parts[] = '<a href="' . $forumHolder->Link() . '">' . $forumHolder->Title . '</a>';
 		$nonPageParts[] = "User Profile";
-		
+
 		return implode(" &raquo; ", array_reverse(array_merge($nonPageParts, $parts)));
 	}
-	
+
 	/**
 	 * Initialise the controller
 	 */
@@ -55,17 +55,17 @@ class ForumMemberProfile extends Page_Controller {
 		Requirements::themedCSS('Forum','forum','all');
 		$member = $this->Member() ? $this->Member() : null;
 		$nicknameText = ($member) ? ($member->Nickname . '\'s ') : '';
-		
+
 		//$this->Title = DBField::create('HTMLText',Convert::raw2xml($nicknameText) . _t('ForumMemberProfile.USERPROFILE', 'User Profile'));
 		$this->Title = DBField::create_field('HTMLText', Convert::raw2xml($nicknameText) . _t('ForumMemberProfile.USERPROFILE', 'User Profile'));
-		
+
 		parent::init();
  	}
 
 	function show($request) {
 		$member = $this->Member();
 		if(!$member) return $this->httpError(404);
-		
+
 		return $this->renderWith(array('ForumMemberProfile_show', 'Page'));
 	}
 
@@ -88,7 +88,7 @@ class ForumMemberProfile extends Page_Controller {
 	 */
 	function register() {
 		return array(
-			"Title" => _t('ForumMemberProfile.FORUMREGTITLE','Forum Registration'), 
+			"Title" => _t('ForumMemberProfile.FORUMREGTITLE','Forum Registration'),
 		 	"Subtitle" => _t('ForumMemberProfile.REGISTER','Register'),
 			"Abstract" => $this->getForumHolder()->ProfileAbstract,
 		);
@@ -115,12 +115,12 @@ class ForumMemberProfile extends Page_Controller {
 		if (isset($_REQUEST['BackURL'])) $fields->push(new HiddenField('BackURL', 'BackURL', $_REQUEST['BackURL']));
 
 		$validator = singleton('Member')->getForumValidator(!$use_openid);
-		
+
 		$form = new Form($this, 'RegistrationForm', $fields,
 			new FieldList(new FormAction("doregister", _t('ForumMemberProfile.REGISTER','Register'))),
 			$validator
 		);
-		
+
 		// Guard against automated spam registrations by optionally adding a field
 		// that is supposed to stay blank (and is hidden from most humans).
 		// The label and field name are intentionally common ("username"),
@@ -129,7 +129,7 @@ class ForumMemberProfile extends Page_Controller {
 		if(ForumHolder::$use_honeypot_on_register) {
 			$form->Fields()->push(
 				new LiteralField(
-					'HoneyPot', 
+					'HoneyPot',
 					'<div style="position: absolute; left: -9999px;">' .
 					// We're super paranoid and don't mention "ignore" or "blank" in the label either
 					'<label for="RegistrationForm_username">' . _t('ForumMemberProfile.LeaveBlank', 'Don\'t enter anything here'). '</label>' .
@@ -148,7 +148,7 @@ class ForumMemberProfile extends Page_Controller {
 
 		// Optional spam protection
 		if(class_exists('SpamProtectorManager') && ForumHolder::$use_spamprotection_on_register) {
-			$form->enableSpamProtection();
+//			$form->enableSpamProtection();
 		}
 		return $form;
 	}
@@ -159,9 +159,10 @@ class ForumMemberProfile extends Page_Controller {
 	 *
 	 * @param array $data User submitted data
 	 * @param Form $form The used form
+	 * @return array|bool|SS_HTTPResponse|void
 	 */
 	function doregister($data, $form) {
-		
+
 		// Check if the honeypot has been filled out
 		if(ForumHolder::$use_honeypot_on_register) {
 			if(@$data['username']) {
@@ -178,12 +179,12 @@ class ForumMemberProfile extends Page_Controller {
   				$form->addErrorMessage("Blurb",
 					_t('ForumMemberProfile.EMAILEXISTS','Sorry, that email address already exists. Please choose another.'),
 					"bad");
-				
+
   				// Load errors into session and post back
 				Session::set("FormInfo.Form_RegistrationForm.data", $data);
 				return $this->redirectBack();
   			}
-  		} 
+  		}
   		elseif(
   			   $this->getForumHolder()->OpenIDAvailable()
   			   && isset($data['IdentityURL'])
@@ -208,75 +209,68 @@ class ForumMemberProfile extends Page_Controller {
 		// create the new member
 		$member = Object::create('Member');
 		$form->saveInto($member);
-  		
+
 		$member->write();
 		$member->login();
-		
+
 		$approvedArray = array();
 		$needApprovalArray = array();
 
-		if(isset($data['ForumGroups'])) {
-			// Add the member to each of the groups
-			foreach($data['ForumGroups'] as $id) {
-				$approval = $this->addMemberToGroup($id, $member); //and send emails to the moderators
-				
-				if(!$approval[1]) {
-					$approvedArray[] = $approval[0];
-				} else {
-					$needApprovalArray[] = $approval[0];
-				}
-			}
+		$forumUsersGroup = Group::get()
+			->filter(['Title' => 'Forum Users'])
+			->first();
+		if ($forumUsersGroup && $forumUsersGroup->exists()) {
+			$this->addMemberToGroup($forumUsersGroup->ID, $member); //and send emails to the moderators
 		}
-		
 
 		$member->extend('onForumRegister', $this->request);
 
 		if (isset($data['BackURL']) && $data['BackURL']) return $this->redirect($data['BackURL']);
-				
+
 		$text = "Your registration has been received and is pending. A moderator will need to approve your membership to the forums.";
-		
+
 		$adminEmail = Config::inst()->get('Forum', 'send_email_from');
 		$email 		= new Email();
 		$email->setFrom($adminEmail);
 		$email->setTo($member->Email);
-		$email->setSubject('ISPIR Forum Signup');
+		$email->setSubject('GPH Forum Signup');
 		$email->setTemplate('ForumRegistration_NotifyUser');
 		$email->populateTemplate(new ArrayData(array(
 			'NewUser' 	=> $member,
 			'BoardURL'	=> $this->getForumHolder()->AbsoluteLink()
 		)));
-		
+
 		$email->send();
-		
+
 		// Log the member out
 		$member = Member::currentUser();
 		if($member) $member->logOut();
 		Session::clear_all();
-		
+
 		// Return the message
 
 		return array("Form" => $text);
 	}
-	
+
 	// Adds the member to a group, pending moderation if required
 	// addMemberToGroup(groupid, member)
 	// returns array with group name and true/false if the group requres moderation
-	
+
 	function addMemberToGroup($id, $member) {
 		$group = Group::get('Group', 'IsForumGroup = 1')->byID($id);
 		// Only add if it is a Forum Group
 
 		if($group) {
 			$member->Groups()->add($group->ID);
-		
+
 			if($group->UserModerationRequired) {
 				// Need to notify the moderators of this group
 				foreach($group->Moderators() as $mod) {
 					$modemail = $mod->Email;
-		
+
 					if($mod->Email){
 						$adminEmail = Config::inst()->get('Forum', 'send_email_from');
-		
+
 						$email = new Email();
 						$email->setFrom($adminEmail);
 						$email->setTo($mod->Email);
@@ -288,7 +282,7 @@ class ForumMemberProfile extends Page_Controller {
 							'NewUser' 		=> $member,
 							'ApproveLink' 	=> $this->getForumHolder()->AbsoluteLink()
 						)));
-		
+
 						$email->send();
 					}
 				}
@@ -302,10 +296,10 @@ class ForumMemberProfile extends Page_Controller {
 			}
 		}
 	}
-	
+
 	// Adds the member to a group, pending moderation if required
 	// addMemberToGroup(groupid, member)
-	
+
 	function removeMemberFromGroup($id, $member) {
 		$group = Group::get('Group', 'IsForumGroup = 1')->byID($id);
 		// Only add if it is a Forum Group
@@ -314,7 +308,7 @@ class ForumMemberProfile extends Page_Controller {
 			$group->Members()->remove($member);
 		}
 	}
-	
+
 
 
 	/**
@@ -555,8 +549,8 @@ class ForumMemberProfile extends Page_Controller {
 		}
 
 		//disable existing group
-		if($member 
-			&& $member->ID 
+		if($member
+			&& $member->ID
 			&& ($memberGroups = $member->Groups()->filter('IsForumGroup' , true)->column('ID'))
 			&& $memberGroups
 			&& count($memberGroups)
@@ -584,10 +578,12 @@ class ForumMemberProfile extends Page_Controller {
 	 *
 	 * @param array $data
 	 * @param $form
+	 * @return bool|SS_HTTPResponse
+	 * @throws ValidationException
 	 */
 	function dosave($data, $form) {
 		$member = Member::currentUser();
-		
+
 		$SQL_email = Convert::raw2sql($data['Email']);
 
 		// An existing member may have the requested email that doesn't belong to the
@@ -602,7 +598,7 @@ class ForumMemberProfile extends Page_Controller {
 					),
 					'bad'
 				);
-				
+
   				return $this->redirectBack();
 			}
 		}
@@ -625,32 +621,18 @@ class ForumMemberProfile extends Page_Controller {
 
 		$form->saveInto($member);
 		$member->write();
-		
-		// See if the user needs access to new groups and remove from other groups
-		$currentGroups = $member->Groups()->filter('IsForumGroup', true)->map()->toArray(); // Only look for forum groups, could potentially remove from other security groups if not careful
-		
-		// Add to new groups
-		foreach($data['ForumGroups'] as $group) {
-			if(!array_key_exists($group, $currentGroups)) {
-				// The member doesn't exist in this group, so that means they are requesting access
-				$this->addMemberToGroup($group, $member);
-			}
-		}
-		
-		// Remove from groups	
-		foreach($currentGroups as $groupid => $group) {
-			if(!array_key_exists($groupid, $data['ForumGroups'])) {
-				// Member exists in the group but the post data didn't include it. We will assume they don't want access to this group anymore
-				$this->removeMemberFromGroup($groupid, $member);
-			}
-		}
-		
-// 		Debug::show($currentGroups->map()->toArray());
-// 		Debug::show($data['ForumGroups']);
-// 		die();
+
+
+//		$forumUsersGroup = Group::get()
+//			->filter(['Title' => 'Forum Users'])
+//			->first();
+//		if ($forumUsersGroup && $forumUsersGroup->exists()) {
+//			$this->addMemberToGroup($forumUsersGroup->ID, $member); //and send emails to the moderators
+//		}
+
 
 		$member->extend('onForumUpdateProfile', $this->request);
-		
+
 		return $this->redirect('thanks');
 	}
 
@@ -693,23 +675,23 @@ class ForumMemberProfile extends Page_Controller {
 		} else {
 			$member = Member::currentUser();
 		}
-		
+
 		return $member;
 	}
 
 	/**
 	 * Get the forum holder controller. Sadly we can't work out which forum holder
-	 * 
+	 *
 	 * @return ForumHolder Returns the forum holder controller.
 	 */
 	function getForumHolder() {
 		$holders = DataObject::get("ForumHolder");
 		if($holders) {
 			foreach($holders as $holder) {
-				if($holder->canView()) return $holder;
+				return $holder;
 			}
 		}
-		
+
 		// no usable forums
 		$messageSet = array(
 			'default' => _t('Forum.LOGINTOPOST','You\'ll need to login before you can post to that forum. Please do so below.'),
@@ -743,9 +725,9 @@ class ForumMemberProfile extends Page_Controller {
 	function MetaTags($includeTitle = true) {
 		$tags = "";
 		$title = _t('ForumMemberProfile.FORUMUSERPROFILE','Forum User Profile');
-		
+
 		if(isset($this->urlParams['Action'])) {
-			if($this->urlParams['Action'] == "register") { 
+			if($this->urlParams['Action'] == "register") {
 				$title = _t('ForumMemberProfile.FORUMUSERREGISTER','Forum Registration');
 			}
 		}
@@ -755,11 +737,11 @@ class ForumMemberProfile extends Page_Controller {
 
 		return $tags;
 	}
-	
+
 	function hideHeader() {
 		return true;
 	}
-	
+
 	function hideFooter() {
 		return true;
 	}
