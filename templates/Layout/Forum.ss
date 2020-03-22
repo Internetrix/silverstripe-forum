@@ -12,7 +12,10 @@
             <p class="forum-message-suspended">
                 This user has been banned. Please contact us if you believe this is a mistake
             </p>
-
+		<% else_if not CurrentMember.CheckIfApproved %>
+            <p class="forum-message-suspended">
+                Your account has not been yet approved by a moderator. Please visit the forum again once you have been approved.
+            </p>
 		<% else %>
 			<% if CurrentMember.isSuspended %>
                 <p class="forum-message-suspended red">

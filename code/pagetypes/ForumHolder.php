@@ -636,6 +636,11 @@ class ForumHolder extends Page {
 					$children->merge(Forum::get()->filter(['ParentID' => $this->ID]));
 				}
 
+				$notYetApproved = $forumGroup->Members()->filter(['Approved' => 0, 'ID' => $memberID]);
+				if ($notYetApproved && $notYetApproved->exists()) {
+					return;
+				}
+
 				return $children;
 			}
 		}
