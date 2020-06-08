@@ -44,7 +44,7 @@ class ForumHolder extends Page {
 	private static $allowed_children = array('Forum');
 
 	private static $defaults = array(
-		"HolderSubtitle" => "Welcome to our forum!",
+		"HolderSubtitle" => "Welcome to the GPH Forums.",
 		"ProfileSubtitle" => "Edit Your Profile",
 		"ForumSubtitle" => "Start a new topic",
 		"HolderAbstract" => "<p>If this is your first visit, you will need to <a class=\"broken\" title=\"Click here to register\" href=\"ForumMemberProfile/register\">register</a> before you can view or post in forums.</p>",

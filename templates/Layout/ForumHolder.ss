@@ -91,7 +91,6 @@
                                     <th colspan="4">There are no users pending moderation.</th>
                                 </tr>
 							<% end_if %>
-
                         </table>
 
                     </div>
