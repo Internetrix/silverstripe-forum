@@ -25,7 +25,6 @@
 				<% end_if %>
 
 				<% include ForumHeader %>
-
 				<% if CurrentMember.isSuspended %>
                     <p class="forum-message-suspended red">
 						$CurrentMember.ForumSuspensionMessage
