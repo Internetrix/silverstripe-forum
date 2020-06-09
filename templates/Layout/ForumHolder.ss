@@ -79,11 +79,11 @@
 							<% if PendingUsers %>
 								<% loop $PendingUsers %>
                                     <tr>
-                                        <th class="odd">$FirstName $Surname</th>
-                                        <th class="odd">$Nickname</th>
-                                        <th class="even">$Email</th>
-                                        <th class="even"><a href="$Top.GetApproveLink($ID)">Approve User</a><br/><a
-                                                href="$Top.GetDenyLink($ID)">Decline User</a></th>
+                                        <td class="odd">$FirstName $Surname</td>
+                                        <td class="odd">$Nickname</td>
+                                        <td class="even">$Email</td>
+                                        <td class="even"><a href="$Top.GetApproveLink($ID)">Approve User</a><br/><a
+                                                href="$Top.GetDenyLink($ID)">Decline User</a></td>
                                     </tr>
 								<% end_loop %>
 							<% else %>

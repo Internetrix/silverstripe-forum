@@ -1,6 +1,6 @@
 <tr class="<% if IsSticky || IsGlobalSticky %>sticky<% end_if %> <% if IsGlobalSticky %>global-sticky<% end_if %>">
 	<td class="topicName">
-		<a class="topic-title" href="$Link">$Title</a>
+		<b><a class="topic-title" href="$Link">$Title</a></b>
 		<p class="topic-summary">
 			<% _t('TopicListing_ss.BY','By') %>
 				<% with FirstPost %>
@@ -22,7 +22,7 @@
 		<% with LatestPost %>
 			<p class="">$Created.Ago</p>
 			<p class="">
-				<% _t('TopicListing_ss.BY','by') %> 
+				<% _t('TopicListing_ss.BY','by') %>
 				<% with Author %>
 					<% if Link %>
 						<a href="$Link" title="<% _t('TopicListing_ss.CLICKTOUSER') %> <% if Nickname %>$Nickname.XML<% else %>Admin<% end_if %><% _t('TopicListing_ss.CLICKTOUSER2') %>">
@@ -31,9 +31,9 @@
 					<% else %>
 						<span>Admin</span>
 					<% end_if %>
-				<% end_with %> 
+				<% end_with %>
 				<a href="$Link" title="<% sprintf(_t('TopicListing_ss.GOTOFIRSTUNREAD','Go to the first unread post in the %s topic.'),$Title.XML) %>"><img src="forum/images/right.png" alt="" /></a>
-			</p> 
+			</p>
 		<% end_with %>
 	</td>
 </tr>

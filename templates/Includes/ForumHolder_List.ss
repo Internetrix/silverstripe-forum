@@ -1,6 +1,6 @@
 <tr>
 	<td>
-		<a class="topic-title" href="$Link">$Title</a>
+		<b><a class="topic-title" href="$Link">$Title</a></b>
 		<% if Content || Moderators %>
 			<div class="summary">
 				<p>$Content.LimitCharacters(80)</p>
