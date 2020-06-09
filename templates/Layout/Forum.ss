@@ -1,10 +1,11 @@
 <div class="content-area">
-    <div class="row basci-pg">
+    <div class="row basci-pg" style="padding-left: 1.5rem;">
 		<% if not CurrentMember.isBanned %>
-			<% include ForumHeader %>
+			<% include ForumHeader Content=$Content%>
 		<% end_if %>
-
-		<% if ForumAdminMsg %>
+	</div>
+    <div class="row">
+	<% if ForumAdminMsg %>
             <p class="forum-message-admin" style="color: red;">$ForumAdminMsg</p>
 		<% end_if %>
 
@@ -27,7 +28,7 @@
                 <p class="message error"><% _t('Forum_ss.READONLYFORUM', 'This Forum is read only. You cannot post replies or start new threads') %></p>
 			<% end_if %>
 			<% if canPost %>
-                <p><a href="{$Link}starttopic" title="<% _t('Forum_ss.NEWTOPIC','Click here to start a new topic') %>"
+                <p style="padding-left: 1rem;"><a href="{$Link}starttopic" title="<% _t('Forum_ss.NEWTOPIC','Click here to start a new topic') %>"
                       class="button"><span>&#43;</span> Start a new topic</a></p>
 			<% end_if %>
 

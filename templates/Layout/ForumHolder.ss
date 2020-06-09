@@ -23,8 +23,7 @@
 						<% include ForumHolder_List %>
 					<% end_loop %>
 				<% end_if %>
-
-				<% include ForumHeader %>
+					<% include ForumHeader Content=$HolderAbstract%>
 				<% if CurrentMember.isSuspended %>
                     <p class="forum-message-suspended red">
 						$CurrentMember.ForumSuspensionMessage

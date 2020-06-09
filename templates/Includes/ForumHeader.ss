@@ -57,6 +57,6 @@
 
     <h1 class="forum-heading"><a name='Header'>$HolderSubtitle</a></h1>
     <p class="forum-breadcrumbs">$Breadcrumbs</p>
-    <p class="forum-abstract">$ForumHolder.HolderAbstract</p>
+    <div class="forum-abstract" style="float: left">$Content</div>
 
 </div><!-- forum-header. -->
