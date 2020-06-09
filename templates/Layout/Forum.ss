@@ -39,7 +39,7 @@
                         <table class="forum-sticky-topics" class="topicList"
                                summary="List of sticky topics in this forum">
                             <tr class="category">
-                                <td colspan="3"><% _t('Forum_ss.ANNOUNCEMENTS', 'Announcements') %></td>
+                                <td colspan="3">Pinned</td>
                             </tr>
 							<% loop getStickyTopics(0) %>
 								<% include TopicListing %>
