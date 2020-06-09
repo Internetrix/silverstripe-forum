@@ -1,9 +1,12 @@
 <div class="forum-header">
 	<% loop ForumHolder %>
         <div class="forum-header-forms">
+
             <span class="forum-search-dropdown-icon"></span>
 			<% if $CurrentMember %>
-                    <span class="login"><a class="button" href="Security/logout">Logout</a></span>
+            <div class="row" style="padding: 0">
+                <span class="login" style="float: right"><a class="button" href="Security/logout">Logout</a></span>
+			</div>
 			<% end_if %>
             <div class="forum-search-bar">
                 <form class="forum-search" action="$Link(search)" method="get">
