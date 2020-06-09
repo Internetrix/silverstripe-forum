@@ -5,16 +5,15 @@
             <p class="forum-message-suspended">
                 This user has been banned. Please contact us if you believe this is a mistake.
             </p>
-			<% else_if not CurrentMember.CheckIfApproved %>
+		<% else_if not CurrentMember.CheckIfApproved %>
             <p class="forum-message-suspended">
-                Your account has not been yet approved by a moderator. Please visit the forum again once you have been approved.
+                Your account has not been yet approved by a moderator. Please visit the forum again once you have been
+                approved.
             </p>
-			<% else %>
+		<% else %>
 			<% if ForumAdminMsg %>
                 <p class="forum-message-admin" style="color: red;">$ForumAdminMsg</p>
 			<% end_if %>
-
-
             <table class="forum-topics">
 				<% if GlobalAnnouncements %>
                     <tr class="category">
@@ -32,10 +31,11 @@
 						$CurrentMember.ForumSuspensionMessage
                     </p>
 				<% end_if %>
-
 				<% if ShowInCategories %>
 					<% loop Forums %>
-                        <tr class="category"><td colspan="4">$Title</td></tr>
+                        <tr class="category">
+                            <td colspan="4">$Title</td>
+                        </tr>
                         <tr class="category">
                             <th><% if Count = 1 %><% _t('ForumHolder_ss.FORUM','Forum') %><% else %><% _t('ForumHolder_ss.FORUMS', 'Forums') %><% end_if %></th>
                             <th><% _t('ForumHolder_ss.THREADS','Threads') %></th>
@@ -83,7 +83,8 @@
                                         <th class="odd">$FirstName $Surname</th>
                                         <th class="odd">$Nickname</th>
                                         <th class="even">$Email</th>
-                                        <th class="even"><a href="$Top.GetApproveLink($ID)">Approve User</a><br /><a href="$Top.GetDenyLink($ID)">Decline User</a></th>
+                                        <th class="even"><a href="$Top.GetApproveLink($ID)">Approve User</a><br/><a
+                                                href="$Top.GetDenyLink($ID)">Decline User</a></th>
                                     </tr>
 								<% end_loop %>
 							<% else %>

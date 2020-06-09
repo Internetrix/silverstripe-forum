@@ -28,7 +28,8 @@ class ForumHolder extends Page {
 		"ShowInCategories" => "Boolean",
 		"AllowGravatars" => "Boolean",
 		"GravatarType" => "Varchar(10)",
-		"ForbiddenWords" => "Text"
+		"ForbiddenWords" => "Text",
+		"UnauthorisedPageTitle" => 'Varchar(255)'
 	);
 
 	private static $has_one = array();
@@ -45,6 +46,7 @@ class ForumHolder extends Page {
 
 	private static $defaults = array(
 		"HolderSubtitle" => "Welcome to the GPH Forums.",
+		"UnauthorisedPageTitle" => "GPH forums login",
 		"ProfileSubtitle" => "Edit Your Profile",
 		"ForumSubtitle" => "Start a new topic",
 		"HolderAbstract" => "<p>If this is your first visit, you will need to <a class=\"broken\" title=\"Click here to register\" href=\"ForumMemberProfile/register\">register</a> before you can view or post in forums.</p>",
@@ -98,6 +100,7 @@ class ForumHolder extends Page {
 				HTMLEditorField::create("HolderAbstract","Forum Holder Abstract"),
 				TextField::create("ProfileSubtitle","Member Profile Subtitle"),
 				HTMLEditorField::create("ProfileAbstract","Member Profile Abstract"),
+				TextField::create("UnauthorisedPageTitle", "Page Title for Login Page"),
 				TextField::create("ForumSubtitle","Create topic Subtitle"),
 				HTMLEditorField::create("ForumAbstract","Create topic Abstract"),
 				HTMLEditorField::create("ProfileModify","Create message after modifing forum member"),
