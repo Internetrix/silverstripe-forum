@@ -17,7 +17,7 @@
             <table class="forum-topics">
 				<% if GlobalAnnouncements %>
                     <tr class="category">
-                        <td colspan="4"><% _t('ForumHolder_ss.ANNOUNCEMENTS', 'Announcements') %></td>
+                        <td colspan="4">Pinned</td>
                     </tr>
 					<% loop GlobalAnnouncements %>
 						<% include ForumHolder_List %>
