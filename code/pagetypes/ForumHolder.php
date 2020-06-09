@@ -453,7 +453,7 @@ class ForumHolder extends Page {
 			return Forum::get()
 				->filter(array(
 					'ParentID' => $this->ID,
-					'ShowInMenus' => 1
+//					'ShowInMenus' => 1
 				))
 				->filterByCallback(function($forum){
 					return $forum->canView();
