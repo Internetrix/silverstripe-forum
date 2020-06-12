@@ -1634,6 +1634,19 @@ class Forum_Controller extends Page_Controller {
 
 		return (Director::is_ajax()) ? true : $this->redirect($post->Link());
 	}
+
+	/**
+	 * On Start Topic and Edit Topic page, we don't want to show content
+	 * @return bool
+	 */
+	public function getHideContent()
+	{
+		$currentAction = $this->getAction();
+		if ($currentAction && in_array($currentAction, array('starttopic', 'editpost'))) {
+			return true;
+		}
+		return false;
+	}
 }
 
 /**

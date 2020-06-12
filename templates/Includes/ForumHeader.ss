@@ -60,6 +60,7 @@
 
     <h1 class="forum-heading"><a name='Header'>$HolderSubtitle</a></h1>
     <p class="forum-breadcrumbs">$Breadcrumbs</p>
+	<% if not $HideContent %>
     <div class="forum-abstract" style="float: left">$Content</div>
-
+	<% end_if %>
 </div><!-- forum-header. -->
