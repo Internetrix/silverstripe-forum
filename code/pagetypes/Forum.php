@@ -9,7 +9,8 @@
  * @package forum
  */
 
-class Forum extends Page {
+class Forum extends Page
+{
 
 	private static $allowed_children = 'none';
 
@@ -63,30 +64,31 @@ class Forum extends Page {
 	/**
 	 * Check if the user can view the forum.
 	 */
-	function canView($member = null) {
-		if(!$member) $member = Member::currentUser();
+	function canView($member = null)
+	{
+		if (!$member) $member = Member::currentUser();
 
-		if(is_numeric($member)) {
+		if (is_numeric($member)) {
 			$member = Member::get()->byID($member);
 		}
 
-		if($member == null) return false;
+		if ($member == null) return false;
 
-		if($this->CanPostType == "Nobody") return false;
-		if($this->CanPostType == "Anyone") return true;
-		if($this->CanPostType == "LoggedInUsers" && $member) return true;
+		if ($this->CanPostType == "Nobody") return false;
+		if ($this->CanPostType == "Anyone") return true;
+		if ($this->CanPostType == "LoggedInUsers" && $member) return true;
 
-		if($groups = $this->PosterGroups()) {
-			foreach($groups as $group) {
+		if ($groups = $this->PosterGroups()) {
+			foreach ($groups as $group) {
 				$memberGroup = $group->Members()->byID($member->ID);
 
-				if($memberGroup) {
-					if($memberGroup->Approved) {
+				if ($memberGroup) {
+					if ($memberGroup->Approved) {
 						return true;
 					} else {
 						return false;
 					}
-				} else if($this->canModerate($member)) {
+				} else if ($this->canModerate($member)) {
 					return true;
 				} else {
 					return false;
@@ -100,27 +102,29 @@ class Forum extends Page {
 	/**
 	 * Check if the user can post to the forum and edit his own posts.
 	 */
-	function canPost($member = null) {
+	function canPost($member = null)
+	{
 		return $this->canView($member);
 	}
 
 	/**
 	 * Check if user has access to moderator panel and can delete posts and threads.
 	 */
-	function canModerate($member = null) {
-		if(!$member) $member = Member::currentUser();
+	function canModerate($member = null)
+	{
+		if (!$member) $member = Member::currentUser();
 
-		if(!$member) return false;
+		if (!$member) return false;
 
 		// Admins
 		if ($this->canEdit($member)) return true;
 
 		// Moderators
-		if($groups = $this->PosterGroups()) {
-			foreach($groups as $group) {
+		if ($groups = $this->PosterGroups()) {
+			foreach ($groups as $group) {
 				$memberGroup = $group->Moderators()->byID($member->ID);
 
-				if($memberGroup) {
+				if ($memberGroup) {
 					return true;
 				} else {
 					return false;
@@ -137,16 +141,18 @@ class Forum extends Page {
 	 * @return bool Set to TRUE if the user is allowed to, to FALSE if they're
 	 *              not
 	 */
-	function canAttach($member = null) {
+	function canAttach($member = null)
+	{
 		//return $this->CanAttachFiles ? true : false;
 		return false;
 	}
 
-	function requireTable() {
+	function requireTable()
+	{
 		// Migrate permission columns
-		if(DB::getConn()->hasTable('Forum')) {
+		if (DB::getConn()->hasTable('Forum')) {
 			$fields = DB::getConn()->fieldList('Forum');
-			if(in_array('ForumPosters', array_keys($fields)) && !in_array('CanPostType', array_keys($fields))) {
+			if (in_array('ForumPosters', array_keys($fields)) && !in_array('CanPostType', array_keys($fields))) {
 				DB::getConn()->renameField('Forum', 'ForumPosters', 'CanPostType');
 				DB::alteration_message('Migrated forum permissions from "ForumPosters" to "CanPostType"', "created");
 			}
@@ -158,7 +164,8 @@ class Forum extends Page {
 	/**
 	 * Check if we can and should show forums in categories
 	 */
-	function getShowInCategories() {
+	function getShowInCategories()
+	{
 		$holder = $this->getForumHolder();
 		if ($holder) {
 			return $holder->getShowInCategories();
@@ -170,10 +177,11 @@ class Forum extends Page {
 	 *
 	 * @return FieldList The fields to be displayed in the CMS.
 	 */
-	function getCMSFields() {
+	function getCMSFields()
+	{
 		$self = $this;
 
-		$this->beforeUpdateCMSFields(function($fields) use ($self) {
+		$this->beforeUpdateCMSFields(function ($fields) use ($self) {
 			Requirements::css("forum/css/Forum_CMS.css");
 
 			$fields->addFieldToTab("Root.ForumSettings", new HeaderField("Access Settings", 2));
@@ -188,7 +196,7 @@ class Forum extends Page {
 			$groups = $self->Parent()->RegGroups()->map()->toArray();
 
 			$fields->addFieldsToTab("Root.ForumSettings", array(
-				$groupCheckboxset = new CheckboxSetField("PosterGroups", _t('Forum.GROUPS',"Groups"), $groups)
+				$groupCheckboxset = new CheckboxSetField("PosterGroups", _t('Forum.GROUPS', "Groups"), $groups)
 			));
 
 			$groupCheckboxset->displayIf("CanPostType")->isEqualTo("OnlyTheseUsers");
@@ -231,7 +239,7 @@ class Forum extends Page {
 				'Nickname' => 'Nickname',
 				'FirstName' => 'First name',
 				'Surname' => 'Surname',
-				'Email'=> 'Email',
+				'Email' => 'Email',
 				'LastVisited.Long' => 'Last Visit'
 			));
 
@@ -244,10 +252,11 @@ class Forum extends Page {
 		return $fields;
 	}
 
-	function onBeforeWrite() {
+	function onBeforeWrite()
+	{
 		parent::onBeforeWrite();
 
-		if($this->CanPostType != "OnlyTheseUsers" && $this->CanPostType != "LoggedInUsers" && $this->PostsRequireModeration) {
+		if ($this->CanPostType != "OnlyTheseUsers" && $this->CanPostType != "LoggedInUsers" && $this->PostsRequireModeration) {
 			$this->PostsRequireModeration = 0;
 		}
 	}
@@ -263,7 +272,8 @@ class Forum extends Page {
 	 *                         displayed
 	 * @return string HTML code to display breadcrumbs
 	 */
-	public function Breadcrumbs($maxDepth = null, $unlinked = false, $stopAtPageType = false, $showHidden = false) {
+	public function Breadcrumbs($maxDepth = null, $unlinked = false, $stopAtPageType = false, $showHidden = false)
+	{
 		$page = $this;
 		$nonPageParts = array();
 		$parts = array();
@@ -272,30 +282,29 @@ class Forum extends Page {
 		$params = $controller->getURLParams();
 
 		$forumThreadID = $params['ID'];
-		if(is_numeric($forumThreadID)) {
-			if($topic = ForumThread::get()->byID($forumThreadID)) {
+		if (is_numeric($forumThreadID)) {
+			if ($topic = ForumThread::get()->byID($forumThreadID)) {
 				$nonPageParts[] = Convert::raw2xml($topic->getTitle());
 			}
 		}
 
-		while($page && (!$maxDepth || sizeof($parts) < $maxDepth)) {
-			if($showHidden || $page->ShowInMenus || ($page->ID == $this->ID)) {
-				if($page->URLSegment == 'home') $hasHome = true;
+		while ($page && (!$maxDepth || sizeof($parts) < $maxDepth)) {
+			if ($showHidden || $page->ShowInMenus || ($page->ID == $this->ID)) {
+				if ($page->URLSegment == 'home') $hasHome = true;
 
-				if($nonPageParts) {
+				if ($nonPageParts) {
 					$parts[] = '<a href="' . $page->Link() . '">' . Convert::raw2xml($page->Title) . '</a>';
-				}
-				else {
+				} else {
 					$parts[] = (($page->ID == $this->ID) || $unlinked)
-							? Convert::raw2xml($page->Title)
-							: '<a href="' . $page->Link() . '">' . Convert::raw2xml($page->Title) . '</a>';
+						? Convert::raw2xml($page->Title)
+						: '<a href="' . $page->Link() . '">' . Convert::raw2xml($page->Title) . '</a>';
 				}
 			}
 
 			$page = $page->Parent;
 		}
 
-		return implode(" &raquo; ", array_reverse(array_merge($nonPageParts,$parts)));
+		return implode(" &raquo; ", array_reverse(array_merge($nonPageParts, $parts)));
 	}
 
 	/**
@@ -304,9 +313,10 @@ class Forum extends Page {
 	 *
 	 * @return ForumHolder
 	 */
-	function getForumHolder() {
+	function getForumHolder()
+	{
 		$holder = $this->Parent();
-		if ($holder->ClassName=='ForumHolder') return $holder;
+		if ($holder->ClassName == 'ForumHolder') return $holder;
 	}
 
 	/**
@@ -315,10 +325,11 @@ class Forum extends Page {
 	 *
 	 * @return Post
 	 */
-	function getLatestPost() {
+	function getLatestPost()
+	{
 		$post = Post::get()->filter('ForumID', $this->ID);
 
-		if(!$this->canModerate()) {
+		if (!$this->canModerate()) {
 			$post = $post->filter('Status', 'Moderated');
 		}
 
@@ -330,7 +341,8 @@ class Forum extends Page {
 	 *
 	 * @return int Returns the number of topics (threads)
 	 */
-	function getNumTopics() {
+	function getNumTopics()
+	{
 		return DB::query(sprintf('SELECT COUNT("ID") FROM "ForumThread" WHERE "ForumID" = \'%s\'', $this->ID))->value();
 	}
 
@@ -339,7 +351,8 @@ class Forum extends Page {
 	 *
 	 * @return int
 	 */
-	function getNumPosts() {
+	function getNumPosts()
+	{
 		return DB::query(sprintf('SELECT COUNT("ID") FROM "Post" WHERE "ForumID" = \'%s\' AND "Status" = \'Moderated\'', $this->ID))->value();
 	}
 
@@ -348,7 +361,8 @@ class Forum extends Page {
 	 *
 	 * @return int
 	 */
-	function getNumAuthors() {
+	function getNumAuthors()
+	{
 		return DB::query(sprintf('SELECT COUNT(DISTINCT "AuthorID") FROM "Post" WHERE "ForumID" = \'%s\'', $this->ID))->value();
 	}
 
@@ -356,7 +370,8 @@ class Forum extends Page {
 	 * Returns the Topics (the first Post of each Thread) for this Forum
 	 * @return DataList
 	 */
-	function getTopics() {
+	function getTopics()
+	{
 		// Get a list of Posts
 		$posts = Post::get();
 
@@ -374,11 +389,11 @@ class Forum extends Page {
 			->setDistinct(false);
 
 		// Only show Moderated posts for users
-		if(!$this->canModerate()) {
+		if (!$this->canModerate()) {
 			$member = Member::currentUser();
-			if($member && $member->ID){
-				$postQuery->addWhere('("Status" IN (\'Moderated\')) OR ("AuthorID" = '.$member->ID.')');
-			}else{
+			if ($member && $member->ID) {
+				$postQuery->addWhere('("Status" IN (\'Moderated\')) OR ("AuthorID" = ' . $member->ID . ')');
+			} else {
 				$postQuery->addWhere('"Status" IN (\'Moderated\')');
 			}
 		} else {
@@ -397,7 +412,7 @@ class Forum extends Page {
 		$threadQuery = $threads->dataQuery()->query();
 		$threadQuery
 			->addSelect(array('"PostMax"."PostCreatedMax", "PostMax"."PostIDMax"'))
-			->addFrom('INNER JOIN ('.$postQuery->sql().') AS "PostMax" ON ("PostMax"."ThreadID" = "ForumThread"."ID")')
+			->addFrom('INNER JOIN (' . $postQuery->sql() . ') AS "PostMax" ON ("PostMax"."ThreadID" = "ForumThread"."ID")')
 			->addOrderBy(array('"PostMax"."PostCreatedMax" DESC', '"PostMax"."PostIDMax" DESC'))
 			->setDistinct(false);
 
@@ -415,9 +430,10 @@ class Forum extends Page {
 	 * @param boolean $include_global Include Global Sticky Threads in the results (default: true)
 	 * @return DataList
 	 */
-	 function getStickyTopics($include_global = true) {
+	function getStickyTopics($include_global = true)
+	{
 		// Get Threads that are sticky & in this forum
-		$where = '("ForumThread"."ForumID" = '.$this->ID.' AND "ForumThread"."IsSticky" = 1)';
+		$where = '("ForumThread"."ForumID" = ' . $this->ID . ' AND "ForumThread"."IsSticky" = 1)';
 		// Get Threads that are globally sticky
 		if ($include_global) $where .= ' OR ("ForumThread"."IsGlobalSticky" = 1)';
 
@@ -433,7 +449,7 @@ class Forum extends Page {
 				$this->ID
 			));
 
-		if(!$this->canModerate()) {
+		if (!$this->canModerate()) {
 			$query->addWhere('"PostMax"."Status" = \'Moderated\'');
 		}
 
@@ -457,7 +473,8 @@ class Forum extends Page {
  *
  * @package forum
  */
-class Forum_Controller extends Page_Controller {
+class Forum_Controller extends Page_Controller
+{
 
 	private static $allowed_actions = array(
 		'AdminFormFeatures',
@@ -481,39 +498,40 @@ class Forum_Controller extends Page_Controller {
 	);
 
 
-	function init() {
+	function init()
+	{
 		parent::init();
-		if($this->redirectedTo()) return;
+		if ($this->redirectedTo()) return;
 
 		//Requirements::javascript(THIRDPARTY_DIR . "/jquery/jquery.js");
 		Requirements::javascript("forum/javascript/Forum.js");
 		Requirements::javascript("forum/javascript/jquery.MultiFile.js");
 
-		Requirements::themedCSS('Forum','forum','all');
+		Requirements::themedCSS('Forum', 'forum', 'all');
 
-		RSSFeed::linkToFeed($this->Parent()->Link("rss/forum/$this->ID"), sprintf(_t('Forum.RSSFORUM',"Posts to the '%s' forum"),$this->Title));
-	 	RSSFeed::linkToFeed($this->Parent()->Link("rss"), _t('Forum.RSSFORUMS','Posts to all forums'));
+		RSSFeed::linkToFeed($this->Parent()->Link("rss/forum/$this->ID"), sprintf(_t('Forum.RSSFORUM', "Posts to the '%s' forum"), $this->Title));
+		RSSFeed::linkToFeed($this->Parent()->Link("rss"), _t('Forum.RSSFORUMS', 'Posts to all forums'));
 
- 	  	if(!$this->canView()) {
- 		  	$messageSet = array(
-				'default' => _t('Forum.LOGINDEFAULT','Enter your email address and password to view this forum.'),
-				'alreadyLoggedIn' => _t('Forum.LOGINALREADY','I&rsquo;m sorry, but you can&rsquo;t access this forum until you&rsquo;ve logged in. If you want to log in as someone else, do so below'),
-				'logInAgain' => _t('Forum.LOGINAGAIN','You have been logged out of the forums. If you would like to log in again, enter a username and password below.')
+		if (!$this->canView()) {
+			$messageSet = array(
+				'default' => _t('Forum.LOGINDEFAULT', 'Enter your email address and password to view this forum.'),
+				'alreadyLoggedIn' => _t('Forum.LOGINALREADY', 'I&rsquo;m sorry, but you can&rsquo;t access this forum until you&rsquo;ve logged in. If you want to log in as someone else, do so below'),
+				'logInAgain' => _t('Forum.LOGINAGAIN', 'You have been logged out of the forums. If you would like to log in again, enter a username and password below.')
 			);
 
 			Security::permissionFailure($this, $messageSet);
 			return;
- 		}
+		}
 
 		// Log this visit to the ForumMember if they exist
 		$member = Member::currentUser();
-		if($member && Config::inst()->get('ForumHolder', 'currently_online_enabled')) {
- 			$member->LastViewed = date("Y-m-d H:i:s");
- 			$member->write();
- 		}
+		if ($member && Config::inst()->get('ForumHolder', 'currently_online_enabled')) {
+			$member->LastViewed = date("Y-m-d H:i:s");
+			$member->write();
+		}
 
 		// Set the back url
-		if(isset($_SERVER['REQUEST_URI'])) {
+		if (isset($_SERVER['REQUEST_URI'])) {
 			Session::set('BackURL', $_SERVER['REQUEST_URI']);
 		} else {
 			Session::set('BackURL', $this->Link());
@@ -525,7 +543,8 @@ class Forum_Controller extends Page_Controller {
 	/**
 	 * A convenience function which provides nice URLs for an rss feed on this forum.
 	 */
-	function rss() {
+	function rss()
+	{
 		$this->redirect($this->Parent()->Link("rss/forum/$this->ID"), 301);
 	}
 
@@ -537,7 +556,8 @@ class Forum_Controller extends Page_Controller {
 	 *
 	 * @return bool Returns TRUE if OpenID is available, FALSE otherwise.
 	 */
-	function OpenIDAvailable() {
+	function OpenIDAvailable()
+	{
 		return $this->Parent()->OpenIDAvailable();
 	}
 
@@ -549,13 +569,14 @@ class Forum_Controller extends Page_Controller {
 	 * @return bool
 	 * @throws ValidationException
 	 */
-	function subscribe(SS_HTTPRequest $request) {
+	function subscribe(SS_HTTPRequest $request)
+	{
 		// Check CSRF
 		if (!SecurityToken::inst()->checkRequest($request)) {
 			return $this->httpError(400);
 		}
 
-		if(Member::currentUser() && !ForumThread_Subscription::already_subscribed($this->urlParams['ID'])) {
+		if (Member::currentUser() && !ForumThread_Subscription::already_subscribed($this->urlParams['ID'])) {
 			$obj = new ForumThread_Subscription();
 			$obj->ThreadID = (int) $this->urlParams['ID'];
 			$obj->MemberID = Member::currentUserID();
@@ -575,16 +596,17 @@ class Forum_Controller extends Page_Controller {
 	 *
 	 * @return bool
 	 */
-	function unsubscribe(SS_HTTPRequest $request) {
+	function unsubscribe(SS_HTTPRequest $request)
+	{
 		$member = Member::currentUser();
 
-		if(!$member) Security::permissionFailure($this, _t('LOGINTOUNSUBSCRIBE', 'To unsubscribe from that thread, please log in first.'));
+		if (!$member) Security::permissionFailure($this, _t('LOGINTOUNSUBSCRIBE', 'To unsubscribe from that thread, please log in first.'));
 
-		if(ForumThread_Subscription::already_subscribed($this->urlParams['ID'], $member->ID)) {
+		if (ForumThread_Subscription::already_subscribed($this->urlParams['ID'], $member->ID)) {
 
 			DB::query("
 				DELETE FROM \"ForumThread_Subscription\" 
-				WHERE \"ThreadID\" = '". Convert::raw2sql($this->urlParams['ID']) ."' 
+				WHERE \"ThreadID\" = '" . Convert::raw2sql($this->urlParams['ID']) . "' 
 				AND \"MemberID\" = '$member->ID'");
 
 			die('1');
@@ -599,10 +621,11 @@ class Forum_Controller extends Page_Controller {
 	 *
 	 * Must be logged in and have the correct permissions to do marking
 	 */
-	function markasspam(SS_HTTPRequest $request) {
+	function markasspam(SS_HTTPRequest $request)
+	{
 		$currentUser = Member::currentUser();
-		if(!isset($this->urlParams['ID'])) return $this->httpError(400);
-		if(!$this->canModerate()) return $this->httpError(403);
+		if (!isset($this->urlParams['ID'])) return $this->httpError(400);
+		if (!$this->canModerate()) return $this->httpError(403);
 
 		// Check CSRF token
 		if (!SecurityToken::inst()->checkRequest($request)) {
@@ -610,9 +633,9 @@ class Forum_Controller extends Page_Controller {
 		}
 
 		$post = Post::get()->byID($this->urlParams['ID']);
-		if($post) {
+		if ($post) {
 			// post was the start of a thread, Delete the whole thing
-			if($post->isFirstPost()) $post->Thread()->delete();
+			if ($post->isFirstPost()) $post->Thread()->delete();
 
 			// Delete the current post
 			$post->delete();
@@ -628,7 +651,7 @@ class Forum_Controller extends Page_Controller {
 
 			// Suspend the member (rather than deleting him),
 			// which gives him or a moderator the chance to revoke a decision.
-			if($author = $post->Author()) {
+			if ($author = $post->Author()) {
 				$author->SuspendedUntil = date('Y-m-d', strtotime('+99 years', SS_Datetime::now()->Format('U')));
 				$author->write();
 			}
@@ -646,9 +669,10 @@ class Forum_Controller extends Page_Controller {
 	}
 
 
-	public function ban(SS_HTTPRequest $r) {
-		if(!$r->param('ID')) return $this->httpError(404);
-		if(!$this->canModerate()) return $this->httpError(403);
+	public function ban(SS_HTTPRequest $r)
+	{
+		if (!$r->param('ID')) return $this->httpError(404);
+		if (!$this->canModerate()) return $this->httpError(403);
 
 		$member = Member::get()->byID($r->param('ID'));
 		if (!$member || !$member->exists()) return $this->httpError(404);
@@ -669,9 +693,10 @@ class Forum_Controller extends Page_Controller {
 		return ($r->isAjax()) ? true : $this->redirectBack();
 	}
 
-	public function ghost(SS_HTTPRequest $r) {
-		if(!$r->param('ID')) return $this->httpError(400);
-		if(!$this->canModerate()) return $this->httpError(403);
+	public function ghost(SS_HTTPRequest $r)
+	{
+		if (!$r->param('ID')) return $this->httpError(400);
+		if (!$this->canModerate()) return $this->httpError(403);
 
 		$member = Member::get()->byID($r->param('ID'));
 		if (!$member || !$member->exists()) return $this->httpError(404);
@@ -698,35 +723,36 @@ class Forum_Controller extends Page_Controller {
 	 * @return DataObjectSet Posts
 	 * @throws Exception
 	 */
-	function Posts($sortDirection = "ASC") {
+	function Posts($sortDirection = "ASC")
+	{
 		$numPerPage = Forum::$posts_per_page;
 
 		$posts = Post::get()
 			->filter('ThreadID', $this->urlParams['ID'])
 			->sort('Created', $sortDirection);
 
-		if(!$this->canModerate()) {
+		if (!$this->canModerate()) {
 			$member = Member::currentUser();
-			if($member && $member->ID){
-				$posts = $posts->where('("Status" IN (\'Moderated\')) OR ("AuthorID" = '.$member->ID.')');
-			}else{
+			if ($member && $member->ID) {
+				$posts = $posts->where('("Status" IN (\'Moderated\')) OR ("AuthorID" = ' . $member->ID . ')');
+			} else {
 				$posts = $posts->filter("Status", "Moderated");
 			}
 		} else {
 			$posts = $posts->filter('Status', array('Moderated', 'Awaiting', 'Rejected'));
 		}
 
-		if(isset($_GET['showPost']) && !isset($_GET['start'])) {
+		if (isset($_GET['showPost']) && !isset($_GET['start'])) {
 			$postIDList = clone $posts;
 			$postIDList = $postIDList->select('ID')->toArray();
 
-			if($postIDList->exists()) {
+			if ($postIDList->exists()) {
 				$foundPos = array_search($_GET['showPost'], $postIDList);
 				$_GET['start'] = floor($foundPos / $numPerPage) * $numPerPage;
 			}
 		}
 
-		if(!isset($_GET['start'])) $_GET['start'] = 0;
+		if (!isset($_GET['start'])) $_GET['start'] = 0;
 
 		$paginated = new PaginatedList($posts, $_GET);
 		$paginated->setPageLength(Forum::$posts_per_page);
@@ -739,7 +765,8 @@ class Forum_Controller extends Page_Controller {
 	 * @return DataObjectSet Returns the usable BB codes
 	 * @see BBCodeParser::usable_tags()
 	 */
-	function BBTags() {
+	function BBTags()
+	{
 		return BBCodeParser::usable_tags();
 	}
 
@@ -748,39 +775,42 @@ class Forum_Controller extends Page_Controller {
 	 *
 	 * @return Form Returns the post message form
 	 */
-	function PostMessageForm($addMode = false, $post = false) {
+	function PostMessageForm($addMode = false, $post = false)
+	{
 		$thread = false;
 
-		if($post) {
+		if ($post) {
 			$thread = $post->Thread();
-		} else if(isset($this->urlParams['ID']) && is_numeric($this->urlParams['ID'])) {
+		} else if (isset($this->urlParams['ID']) && is_numeric($this->urlParams['ID'])) {
 			$thread = DataObject::get_by_id('ForumThread', $this->urlParams['ID']);
 		}
 
 		// Check permissions
 		$messageSet = array(
-			'default' => _t('Forum.LOGINTOPOST','You\'ll need to login before you can post to that forum. Please do so below.'),
-			'alreadyLoggedIn' => _t('Forum.LOGINTOPOSTLOGGEDIN',
-				 'I\'m sorry, but you can\'t post to this forum until you\'ve logged in.'
-			  	.'If you want to log in as someone else, do so below. If you\'re logged in and you still can\'t post, you don\'t have the correct permissions to post.'),
-			'logInAgain' => _t('Forum.LOGINTOPOSTAGAIN','You have been logged out of the forums.  If you would like to log in again to post, enter a username and password below.'),
+			'default' => _t('Forum.LOGINTOPOST', 'You\'ll need to login before you can post to that forum. Please do so below.'),
+			'alreadyLoggedIn' => _t(
+				'Forum.LOGINTOPOSTLOGGEDIN',
+				'I\'m sorry, but you can\'t post to this forum until you\'ve logged in.'
+					. 'If you want to log in as someone else, do so below. If you\'re logged in and you still can\'t post, you don\'t have the correct permissions to post.'
+			),
+			'logInAgain' => _t('Forum.LOGINTOPOSTAGAIN', 'You have been logged out of the forums.  If you would like to log in again to post, enter a username and password below.'),
 		);
 
 		// Creating new thread
 		if ($addMode && !$this->canPost()) {
- 			Security::permissionFailure($this, $messageSet);
+			Security::permissionFailure($this, $messageSet);
 			return false;
 		}
 
 		// Replying to existing thread
 		if (!$addMode && !$post && $thread && !$thread->canPost()) {
- 			Security::permissionFailure($this, $messageSet);
+			Security::permissionFailure($this, $messageSet);
 			return false;
 		}
 
 		// Editing existing post
 		if (!$addMode && $post && !$post->canEdit()) {
- 			Security::permissionFailure($this, $messageSet);
+			Security::permissionFailure($this, $messageSet);
 			return false;
 		}
 
@@ -791,10 +821,10 @@ class Forum_Controller extends Page_Controller {
 
 		// If the action is editpost, the ID will be the post id. If the action is anything else, it is the forumthread id
 
-		if($id && !(isset($this->urlParams['Action']) && $this->urlParams['Action'] == 'editpost')) {
+		if ($id && !(isset($this->urlParams['Action']) && $this->urlParams['Action'] == 'editpost')) {
 			$thread = ForumThread::get()->byID($id);
 			$threadoverride = $thread->OverrideMediaOption;
-		} else if(isset($this->urlParams['Action']) && $this->urlParams['Action'] == 'editpost') {
+		} else if (isset($this->urlParams['Action']) && $this->urlParams['Action'] == 'editpost') {
 			$post = Post::get()->byID($id);
 			$threadoverride = $post->Thread()->OverrideMediaOption;
 		}
@@ -806,46 +836,48 @@ class Forum_Controller extends Page_Controller {
 
 		$fields = new FieldList(
 			new LiteralField("tinymce", $forumtinymce),
-				($post && $post->isFirstPost() || !$thread) ? new TextField("Title", _t('Forum.FORUMTHREADTITLE', 'Title')) : new ReadonlyField('Title',  _t('Forum.FORUMTHREADTITLE', ''), 'Re:'. $thread->Title),
+			($post && $post->isFirstPost() || !$thread) ? new TextField("Title", _t('Forum.FORUMTHREADTITLE', 'Title')) : new ReadonlyField('Title',  _t('Forum.FORUMTHREADTITLE', ''), 'Re:' . $thread->Title),
 			new HtmlEditorField("Content", _t('Forum.FORUMREPLYCONTENT', 'Content')),
-			new CheckboxField("TopicSubscription",
-				_t('Forum.SUBSCRIBETOPIC','Subscribe to this topic (Receive email notifications when a new reply is added)'),
-				($thread) ? $thread->getHasSubscribed() : false)
+			new CheckboxField(
+				"TopicSubscription",
+				_t('Forum.SUBSCRIBETOPIC', 'Subscribe to this topic (Receive email notifications when a new reply is added)'),
+				($thread) ? $thread->getHasSubscribed() : false
+			)
 		);
 
-		if($this->PostsRequireModeration && !$this->canModerate()) {
+		if ($this->PostsRequireModeration && !$this->canModerate()) {
 			$ModNotice = $this->getForumHolder()->PostModeratedNotice;
 
-			if($ModNotice) {
+			if ($ModNotice) {
 				$fields->push(new LiteralField("ModNotice", $ModNotice));
 			}
 		}
 
 
-		if($thread) $fields->push(new HiddenField('ThreadID', 'ThreadID', $thread->ID));
-		if($post) $fields->push(new HiddenField('ID', 'ID', $post->ID));
+		if ($thread) $fields->push(new HiddenField('ThreadID', 'ThreadID', $thread->ID));
+		if ($post) $fields->push(new HiddenField('ID', 'ID', $post->ID));
 
 		// Check if we can attach files to this forum's posts
-		if($this->canAttach()) {
+		if ($this->canAttach()) {
 			$fields->push(FileField::create("Attachment", _t('Forum.ATTACH', 'Attach file')));
 		}
 
 		// If this is an existing post check for current attachments and generate
 		// a list of the uploaded attachments
-		if($post && $attachmentList = $post->Attachments()) {
-			if($attachmentList->exists()) {
-				$attachments = "<div id=\"CurrentAttachments\"><h4>". _t('Forum.CURRENTATTACHMENTS', 'Current Attachments') ."</h4><ul>";
+		if ($post && $attachmentList = $post->Attachments()) {
+			if ($attachmentList->exists()) {
+				$attachments = "<div id=\"CurrentAttachments\"><h4>" . _t('Forum.CURRENTATTACHMENTS', 'Current Attachments') . "</h4><ul>";
 				$link = $this->Link();
 				// An instance of the security token
 				$token = SecurityToken::inst();
 
-				foreach($attachmentList as $attachment) {
+				foreach ($attachmentList as $attachment) {
 					// Generate a link properly, since it requires a security token
 					$attachmentLink = Controller::join_links($link, 'deleteattachment', $attachment->ID);
 					$attachmentLink = $token->addToUrl($attachmentLink);
 
 					$attachments .= "<li class='attachment-$attachment->ID'>$attachment->Name [<a href='{$attachmentLink}' rel='$attachment->ID' class='deleteAttachment'>"
-							. _t('Forum.REMOVE','remove') . "</a>]</li>";
+						. _t('Forum.REMOVE', 'remove') . "</a>]</li>";
 				}
 				$attachments .= "</ul></div>";
 
@@ -863,7 +895,7 @@ class Forum_Controller extends Page_Controller {
 
 		$this->extend('updatePostMessageForm', $form, $post);
 
-		if($post) $form->loadDataFrom($post);
+		if ($post) $form->loadDataFrom($post);
 
 		return $form;
 	}
@@ -876,7 +908,8 @@ class Forum_Controller extends Page_Controller {
 	 * @deprecated 0.5
 	 * @return Form
 	 */
-	function ReplyForm() {
+	function ReplyForm()
+	{
 		user_error('Please Use $PostMessageForm in your template rather that $ReplyForm', E_USER_WARNING);
 
 		return $this->PostMessageForm();
@@ -891,7 +924,8 @@ class Forum_Controller extends Page_Controller {
 	 * @return bool|SS_HTTPResponse
 	 * @throws ValidationException
 	 */
-	function doPostMessageForm($data, $form) {
+	function doPostMessageForm($data, $form)
+	{
 		$member = Member::currentUser();
 
 		//Allows interception of a Member posting content to perform some action before the post is made.
@@ -903,18 +937,18 @@ class Forum_Controller extends Page_Controller {
 		// If a thread id is passed append the post to the thread. Otherwise create
 		// a new thread
 		$thread = false;
-		if(isset($data['ThreadID'])) {
+		if (isset($data['ThreadID'])) {
 			$thread = DataObject::get_by_id('ForumThread', $data['ThreadID']);
 		}
 
 		// If this is a simple edit the post then handle it here. Look up the correct post,
 		// make sure we have edit rights to it then update the post
 		$post = false;
-		if(isset($data['ID'])) {
+		if (isset($data['ID'])) {
 			$post = DataObject::get_by_id('Post', $data['ID']);
 
-			if($post && $post->isFirstPost()) {
-				if($title) {
+			if ($post && $post->isFirstPost()) {
+				if ($title) {
 					$thread->Title = $title;
 				}
 			}
@@ -923,9 +957,9 @@ class Forum_Controller extends Page_Controller {
 
 		// Check permissions
 		$messageSet = array(
-			'default' => _t('Forum.LOGINTOPOST','You\'ll need to login before you can post to that forum. Please do so below.'),
-			'alreadyLoggedIn' => _t('Forum.NOPOSTPERMISSION','I\'m sorry, but you do not have permission post to this forum.'),
-			'logInAgain' => _t('Forum.LOGINTOPOSTAGAIN','You have been logged out of the forums.  If you would like to log in again to post, enter a username and password below.'),
+			'default' => _t('Forum.LOGINTOPOST', 'You\'ll need to login before you can post to that forum. Please do so below.'),
+			'alreadyLoggedIn' => _t('Forum.NOPOSTPERMISSION', 'I\'m sorry, but you do not have permission post to this forum.'),
+			'logInAgain' => _t('Forum.LOGINTOPOSTAGAIN', 'You have been logged out of the forums.  If you would like to log in again to post, enter a username and password below.'),
 		);
 
 		$newPostorThread = false;
@@ -933,31 +967,31 @@ class Forum_Controller extends Page_Controller {
 
 		// Creating new thread
 		if (!$thread && !$this->canPost()) {
- 			Security::permissionFailure($this, $messageSet);
+			Security::permissionFailure($this, $messageSet);
 			return false;
-		}elseif(!$thread) {
+		} elseif (!$thread) {
 			$newPostorThread = true;
 			$newThread = true;
 		}
 
 		// Replying to existing thread
 		if ($thread && !$post && !$thread->canPost()) {
- 			Security::permissionFailure($this, $messageSet);
+			Security::permissionFailure($this, $messageSet);
 			return false;
-		}elseif(!$post) {
+		} elseif (!$post) {
 			$newPostorThread = true;
 		}
 
 		// Editing existing post
 		if ($thread && $post && !$post->canEdit()) {
- 			Security::permissionFailure($this, $messageSet);
+			Security::permissionFailure($this, $messageSet);
 			return false;
 		}
 
-		if(!$thread) {
+		if (!$thread) {
 			$thread = new ForumThread();
 			$thread->ForumID = $this->ID;
-			if($title) $thread->Title = $title;
+			if ($title) $thread->Title = $title;
 			$starting_thread = true;
 		}
 
@@ -966,25 +1000,24 @@ class Forum_Controller extends Page_Controller {
 		//$attachments = new DataObjectSet();
 		$attachments = new ArrayList();
 
-		if(!empty($data['Attachment-0']) && !empty($data['Attachment-0']['tmp_name'])) {
+		if (!empty($data['Attachment-0']) && !empty($data['Attachment-0']['tmp_name'])) {
 			$id = 0;
 			//
 			// @todo this only supports ajax uploads. Needs to change the key (to simply Attachment).
 			//
-			while(isset($data['Attachment-' . $id])) {
+			while (isset($data['Attachment-' . $id])) {
 				$image = $data['Attachment-' . $id];
 
-				if($image && !empty($image['tmp_name'])) {
+				if ($image && !empty($image['tmp_name'])) {
 					$file = Post_Attachment::create();
 					$file->OwnerID = Member::currentUserID();
-					$folder = Config::inst()->get('ForumHolder','attachments_folder');
+					$folder = Config::inst()->get('ForumHolder', 'attachments_folder');
 
 					try {
 						$upload = Upload::create()->loadIntoFile($image, $file, $folder);
 						$file->write();
 						$attachments->push($file);
-					}
-					catch(ValidationException $e) {
+					} catch (ValidationException $e) {
 						$message = _t('Forum.UPLOADVALIDATIONFAIL', 'Unallowed file uploaded. Please only upload files of the following: ');
 						$message .= implode(', ', Config::inst()->get('File', 'allowed_extensions'));
 						$form->addErrorMessage('Attachment', $message, 'bad');
@@ -1002,14 +1035,14 @@ class Forum_Controller extends Page_Controller {
 		// from now on the user has the correct permissions. save the current thread settings
 		$thread->write();
 
-		if(!$post || !$post->canEdit()) {
+		if (!$post || !$post->canEdit()) {
 			$post = new Post();
 			$post->AuthorID = ($member) ? $member->ID : 0;
 			$post->ThreadID = $thread->ID;
 		}
 
 		// Flag the post as awaiting moderation if this forum requires posts to be moderated
-		if($newPostorThread && $this->PostsRequireModeration && !$this->canModerate()) {
+		if ($newPostorThread && $this->PostsRequireModeration && !$this->canModerate()) {
 			$post->Status = "Awaiting";
 		}
 
@@ -1026,8 +1059,8 @@ class Forum_Controller extends Page_Controller {
 		$post->write();
 
 
-		if($attachments) {
-			foreach($attachments as $attachment) {
+		if ($attachments) {
+			foreach ($attachments as $attachment) {
 				$attachment->PostID = $post->ID;
 				$attachment->write();
 			}
@@ -1035,15 +1068,15 @@ class Forum_Controller extends Page_Controller {
 
 		// Add a topic subscription entry if required
 		$isSubscribed = ForumThread_Subscription::already_subscribed($thread->ID);
-		if(isset($data['TopicSubscription'])) {
-			if(!$isSubscribed) {
+		if (isset($data['TopicSubscription'])) {
+			if (!$isSubscribed) {
 				// Create a new topic subscription for this member
 				$obj = new ForumThread_Subscription();
 				$obj->ThreadID = $thread->ID;
 				$obj->MemberID = Member::currentUserID();
 				$obj->write();
 			}
-		} elseif($isSubscribed) {
+		} elseif ($isSubscribed) {
 			// See if the member wanted to remove themselves
 			DB::query("DELETE FROM \"ForumThread_Subscription\" WHERE \"ThreadID\" = '$post->ThreadID' AND \"MemberID\" = '$member->ID'");
 		}
@@ -1057,7 +1090,7 @@ class Forum_Controller extends Page_Controller {
 		}
 
 		// Redirect to Forum or post
-		if($this->PostsRequireModeration && $newThread) {
+		if ($this->PostsRequireModeration && $newThread) {
 			return $this->redirect($this->Link()); // Redirect to Forum
 		} else {
 			return $this->redirect($post->Link()); // Redirect to Post
@@ -1067,26 +1100,27 @@ class Forum_Controller extends Page_Controller {
 	/**
 	 * Send email to moderators notifying them the thread has been created or post added/edited.
 	 */
-	function notifyModerators($post, $thread, $starting_thread = false) {
-		if($groups = $this->PosterGroups()) {
-			foreach($groups as $group) {
+	function notifyModerators($post, $thread, $starting_thread = false)
+	{
+		if ($groups = $this->PosterGroups()) {
+			foreach ($groups as $group) {
 				$modGroup = $group->Moderators();
 
-				if($modGroup) { // Moderator
-					foreach($modGroup as $mod) {
+				if ($modGroup) { // Moderator
+					foreach ($modGroup as $mod) {
 						$modemail = $mod->Email;
 
-						if($mod->Email){
+						if ($mod->Email) {
 							$adminEmail = Config::inst()->get('Forum', 'send_email_from');
 
 							$email = new Email();
 							$email->setFrom($adminEmail);
 							$email->setTo($mod->Email);
 
-							if($starting_thread){
-								$email->setSubject($this->Title.': New thread "' . $thread->Title . '"');
-							}else{
-								$email->setSubject($this->Title.': New post "' . $post->Title. '"');
+							if ($starting_thread) {
+								$email->setSubject($this->Title . ': New thread "' . $thread->Title . '"');
+							} else {
+								$email->setSubject($this->Title . ': New post "' . $post->Title . '"');
 							}
 
 							$email->setTemplate('ForumMember_NotifyModerator');
@@ -1094,14 +1128,14 @@ class Forum_Controller extends Page_Controller {
 							// Get approve link
 							$token = SecurityToken::inst();
 
-							$approveUrl = Controller::join_links($this->Link('approvepost'),$post->ID);
+							$approveUrl = Controller::join_links($this->Link('approvepost'), $post->ID);
 							$approveUrl = $token->addToUrl($approveUrl);
 
-							$deleteURL = Controller::join_links($this->Link('deletepost'),$post->ID);
+							$deleteURL = Controller::join_links($this->Link('deletepost'), $post->ID);
 							$deleteURL = $token->addToUrl($deleteURL);
 
-							if($post->AwaitingEdit) {
-								$revertEditURL = Controller::join_links($this->Link('revertedit'),$post->ID);
+							if ($post->AwaitingEdit) {
+								$revertEditURL = Controller::join_links($this->Link('revertedit'), $post->ID);
 								$revertEditURL = $token->addToUrl($revertEditURL);
 							} else {
 								$revertEditURL = false;
@@ -1126,27 +1160,28 @@ class Forum_Controller extends Page_Controller {
 		}
 	}
 
-	function notifyUserPostDeleted($post) {
-		if($post) {
+	function notifyUserPostDeleted($post)
+	{
+		if ($post) {
 			$member = $post->Author();
 
-			if($member->Email) {
+			if ($member->Email) {
 				// Send an email to the user
 
 				$adminEmail = Config::inst()->get('Forum', 'send_email_from');
 
-				if($post->isFirstPost()){
+				if ($post->isFirstPost()) {
 					$postType = 'Topic';
-				}else{
+				} else {
 					$postType = 'Post';
 				}
 				$postTypeObj = Varchar::create();
 				$postTypeObj->setValue($postType);
 
 
-				if($post->Status == 'Moderated' && $post->AwaitingDelete){
+				if ($post->Status == 'Moderated' && $post->AwaitingDelete) {
 					$ActionTypeTXT = 'deleted';
-				}else{
+				} else {
 					$ActionTypeTXT = 'disapproved';
 				}
 				$ActionType = Varchar::create();
@@ -1172,36 +1207,37 @@ class Forum_Controller extends Page_Controller {
 		}
 	}
 
-	function notifyModeratorsDeleteRequest($post) {
-		if($groups = $this->PosterGroups()) {
-			foreach($groups as $group) {
+	function notifyModeratorsDeleteRequest($post)
+	{
+		if ($groups = $this->PosterGroups()) {
+			foreach ($groups as $group) {
 				$modGroup = $group->Moderators();
 
-				if($modGroup) { // Moderator
-					foreach($modGroup as $mod) {
+				if ($modGroup) { // Moderator
+					foreach ($modGroup as $mod) {
 						$modemail = $mod->Email;
 
-						if($mod->Email){
+						if ($mod->Email) {
 							$adminEmail = Config::inst()->get('Forum', 'send_email_from');
 
 							$email = new Email();
 							$email->setFrom($adminEmail);
 							$email->setTo($mod->Email);
-							$email->setSubject($this->Title.': User request to delete post');
+							$email->setSubject($this->Title . ': User request to delete post');
 
 							$email->setTemplate('ForumMember_NotifyModDelete');
 
 							// Get approve link
 							$token = SecurityToken::inst();
 
-							$deleteURL = Controller::join_links($this->Link('deletepost'),$post->ID);
+							$deleteURL = Controller::join_links($this->Link('deletepost'), $post->ID);
 							$deleteURL = $token->addToUrl($deleteURL);
 
 							$email->populateTemplate(new ArrayData(array(
-									'Author' => $post->Author(),
-									'Forum' => $this,
-									'Post' => $post,
-									'DeleteURL' => $deleteURL
+								'Author' => $post->Author(),
+								'Forum' => $this,
+								'Post' => $post,
+								'DeleteURL' => $deleteURL
 							)));
 
 							$email->send();
@@ -1217,22 +1253,24 @@ class Forum_Controller extends Page_Controller {
 	 *
 	 * @return Text
 	 */
-	function getForbiddenWords() {
+	function getForbiddenWords()
+	{
 		return $this->Parent()->ForbiddenWords;
 	}
 
 	/**
-	* This function filters $content by forbidden words, entered in forum holder.
-	*
-	* @param String $content (it can be Post Content or Post Title)
-	* @return String $content (filtered string)
-	*/
-	function filterLanguage($content) {
+	 * This function filters $content by forbidden words, entered in forum holder.
+	 *
+	 * @param String $content (it can be Post Content or Post Title)
+	 * @return String $content (filtered string)
+	 */
+	function filterLanguage($content)
+	{
 		$words = $this->getForbiddenWords();
-		if($words != ""){
-			$words = explode(",",$words);
-			foreach($words as $word){
-				$content = str_ireplace(trim($word),"*",$content);
+		if ($words != "") {
+			$words = explode(",", $words);
+			foreach ($words as $word) {
+				$content = str_ireplace(trim($word), "*", $content);
 			}
 		}
 
@@ -1244,7 +1282,8 @@ class Forum_Controller extends Page_Controller {
 	 *
 	 * @return string URL for the reply action
 	 */
-	function ReplyLink() {
+	function ReplyLink()
+	{
 		return $this->Link() . 'reply/' . $this->urlParams['ID'];
 	}
 
@@ -1255,23 +1294,24 @@ class Forum_Controller extends Page_Controller {
 	 *
 	 * @return array|SS_HTTPResponse_Exception
 	 */
- 	function show() {
+	function show()
+	{
 		$title = Convert::raw2xml($this->Title);
 
-		if($thread = $this->getForumThread()) {
+		if ($thread = $this->getForumThread()) {
 
 			//If there is not first post either the thread has been removed or thread if a banned spammer.
-			if(!$thread->getFirstPost()){
+			if (!$thread->getFirstPost()) {
 				// don't hide the post for logged in admins or moderators
 				$member = Member::currentUser();
-				if(!$this->canModerate($member)) {
+				if (!$this->canModerate($member)) {
 					return $this->httpError(404);
 				}
 			}
 
 			$thread->incNumViews();
 
-			$posts = sprintf(_t('Forum.POSTTOTOPIC',"Posts to the %s topic"), $thread->Title);
+			$posts = sprintf(_t('Forum.POSTTOTOPIC', "Posts to the %s topic"), $thread->Title);
 
 			RSSFeed::linkToFeed($this->Link("rss") . '/thread/' . (int) $this->urlParams['ID'], $posts);
 
@@ -1282,12 +1322,11 @@ class Forum_Controller extends Page_Controller {
 				'Thread' => $thread,
 				'Title' => $field
 			);
-		}
-		else {
+		} else {
 			// if redirecting post ids to thread id is enabled then we need
 			// to check to see if this matches a post and if it does redirect
-			if(Forum::$redirect_post_urls_to_thread && isset($this->urlParams['ID']) && is_numeric($this->urlParams['ID'])) {
-				if($post = Post::get()->byID($this->urlParams['ID'])) {
+			if (Forum::$redirect_post_urls_to_thread && isset($this->urlParams['ID']) && is_numeric($this->urlParams['ID'])) {
+				if ($post = Post::get()->byID($this->urlParams['ID'])) {
 					return $this->redirect($post->Link(), 301);
 				}
 			}
@@ -1301,9 +1340,10 @@ class Forum_Controller extends Page_Controller {
 	 *
 	 * @return array Returns an array to render the start topic page
 	 */
-	function starttopic() {
+	function starttopic()
+	{
 		$topic = array(
-			'Subtitle' => DBField::create_field('HTMLText', _t('Forum.NEWTOPIC','Start a new topic')),
+			'Subtitle' => DBField::create_field('HTMLText', _t('Forum.NEWTOPIC', 'Start a new topic')),
 			'Abstract' => DBField::create_field('HTMLText', DataObject::get_one("ForumHolder")->ForumAbstract)
 		);
 		return $topic;
@@ -1314,7 +1354,8 @@ class Forum_Controller extends Page_Controller {
 	 *
 	 * @return string Returns the forum title
 	 */
-	function getHolderSubtitle() {
+	function getHolderSubtitle()
+	{
 		return $this->dbObject('Title');
 	}
 
@@ -1323,13 +1364,14 @@ class Forum_Controller extends Page_Controller {
 	 *
 	 * @return ForumThread
 	 */
-	function getForumThread() {
-		if(isset($this->urlParams['ID'])) {
+	function getForumThread()
+	{
+		if (isset($this->urlParams['ID'])) {
 			$SQL_id = Convert::raw2sql($this->urlParams['ID']);
 
-			if(is_numeric($SQL_id)) {
-				if($thread = DataObject::get_by_id('ForumThread', $SQL_id)) {
-					if(!$thread->canView()) {
+			if (is_numeric($SQL_id)) {
+				if ($thread = DataObject::get_by_id('ForumThread', $SQL_id)) {
+					if (!$thread->canView()) {
 						Security::permissionFailure($this);
 
 						return false;
@@ -1349,18 +1391,19 @@ class Forum_Controller extends Page_Controller {
 	 *
 	 * @return boolean
 	 */
-	function deleteattachment(SS_HTTPRequest $request) {
+	function deleteattachment(SS_HTTPRequest $request)
+	{
 		// Check CSRF token
 		if (!SecurityToken::inst()->checkRequest($request)) {
 			return $this->httpError(400);
 		}
 
 		// check we were passed an id and member is logged in
-		if(!isset($this->urlParams['ID'])) return false;
+		if (!isset($this->urlParams['ID'])) return false;
 
 		$file = DataObject::get_by_id("Post_Attachment", (int) $this->urlParams['ID']);
 
-		if($file && $file->canDelete()) {
+		if ($file && $file->canDelete()) {
 			$file->delete();
 
 			return (!Director::is_ajax()) ? $this->redirectBack() : true;
@@ -1374,9 +1417,10 @@ class Forum_Controller extends Page_Controller {
 	 *
 	 * @return array Returns an array to render the edit post page
 	 */
-	function editpost() {
+	function editpost()
+	{
 		return array(
-			'Subtitle' => _t('Forum.EDITPOST','Edit post')
+			'Subtitle' => _t('Forum.EDITPOST', 'Edit post')
 		);
 	}
 
@@ -1385,7 +1429,8 @@ class Forum_Controller extends Page_Controller {
 	 *
 	 * @return Form
 	 */
-	function EditForm() {
+	function EditForm()
+	{
 		$id = (isset($this->urlParams['ID'])) ? $this->urlParams['ID'] : null;
 		$post = DataObject::get_by_id('Post', $id);
 
@@ -1398,18 +1443,17 @@ class Forum_Controller extends Page_Controller {
 	 *
 	 * @return bool
 	 */
-	function deletepost(SS_HTTPRequest $request) {
-
-
-		if(isset($this->urlParams['ID'])) {
-			if($post = DataObject::get_by_id('Post', (int) $this->urlParams['ID'])) {
+	function deletepost(SS_HTTPRequest $request)
+	{
+		if (isset($this->urlParams['ID'])) {
+			if ($post = DataObject::get_by_id('Post', (int) $this->urlParams['ID'])) {
 				$redirectToPost = true;
-				if($post->canDelete()) {
+				if ($post->canDelete()) {
 					// Notify the user that their post has been deleted
-					if($this->PostsRequireModeration && $this->canModerate()) {
+					if ($this->PostsRequireModeration && $this->canModerate()) {
 						$this->notifyUserPostDeleted($post);
 						$this->doDelete($post);
-					}else if($this->PostsRequireModeration && !$this->canModerate()) {
+					} else if ($this->PostsRequireModeration && !$this->canModerate()) {
 						// Send a notification to mods that a delete is required
 						$this->notifyModeratorsDeleteRequest($post);
 						$post->AwaitingDelete = true;
@@ -1422,17 +1466,17 @@ class Forum_Controller extends Page_Controller {
 					}
 				}
 			}
-	  	}
+		}
 
-		return (Director::is_ajax()) ? true : $this->redirect(($redirectToPost ? $post->Link() : $this->Link()));
+		return (Director::is_ajax()) ? true : $this->redirect($this->Link());
 	}
 
-	function doDelete($post) {
-		if($post->isFirstPost()) {
+	function doDelete($post)
+	{
+		if ($post->isFirstPost()) {
 			$thread = DataObject::get_by_id("ForumThread", $post->ThreadID);
 			$thread->delete();
-		}
-		else {
+		} else {
 			// delete the post
 			$post->delete();
 		}
@@ -1443,7 +1487,8 @@ class Forum_Controller extends Page_Controller {
 	 * is used for things like Moving thread messages
 	 * @return String
 	 */
-	function ForumAdminMsg() {
+	function ForumAdminMsg()
+	{
 		$message = Session::get('ForumAdminMsg');
 		Session::clear('ForumAdminMsg');
 
@@ -1457,25 +1502,26 @@ class Forum_Controller extends Page_Controller {
 	 *
 	 * @return Form
 	 */
-	function AdminFormFeatures() {
+	function AdminFormFeatures()
+	{
 		if (!$this->canModerate()) return;
 
 		$id = (isset($this->urlParams['ID'])) ? $this->urlParams['ID'] : false;
 
 		$fields = new FieldList(
-			new CheckboxField('IsSticky', _t('Forum.ISSTICKYTHREAD','Is this a Sticky Thread?')),
-//			new CheckboxField('IsGlobalSticky', _t('Forum.ISGLOBALSTICKY','Is this a Global Sticky (shown on all forums)')),
-			new CheckboxField('IsReadOnly', _t('Forum.ISREADONLYTHREAD','Is this a Read only Thread?')),
+			new CheckboxField('IsSticky', _t('Forum.ISSTICKYTHREAD', 'Is this a Sticky Thread?')),
+			//			new CheckboxField('IsGlobalSticky', _t('Forum.ISGLOBALSTICKY','Is this a Global Sticky (shown on all forums)')),
+			new CheckboxField('IsReadOnly', _t('Forum.ISREADONLYTHREAD', 'Is this a Read only Thread?')),
 			new HiddenField("ID", "Thread")
 		);
 
 		// Only show the Override media option if Media Embedding is allowed for this forum
-		if($this->AllowMediaEmbed) {
+		if ($this->AllowMediaEmbed) {
 			$fields->push(new CheckboxField('OverrideMediaOption', "Disable media embedding in this thead"));
 		}
 
-		if(($forums = Forum::get()) && $forums->exists()) {
-			$fields->push(new DropdownField("ForumID", _t('Forum.CHANGETHREADFORUM',"Change Thread Forum"), $forums->map('ID', 'Title', 'Select New Category:')), '', null, 'Select New Location:');
+		if (($forums = Forum::get()) && $forums->exists()) {
+			$fields->push(new DropdownField("ForumID", _t('Forum.CHANGETHREADFORUM', "Change Thread Forum"), $forums->map('ID', 'Title', 'Select New Category:')), '', null, 'Select New Location:');
 		}
 
 		$actions = new FieldList(
@@ -1487,7 +1533,7 @@ class Forum_Controller extends Page_Controller {
 		// need this id wrapper since the form method is called on save as
 		// well and needs to return a valid form object
 
-		if($id) {
+		if ($id) {
 			$thread = ForumThread::get()->byID($id);
 			$form->loadDataFrom($thread);
 		}
@@ -1495,19 +1541,21 @@ class Forum_Controller extends Page_Controller {
 		return $form;
 	}
 
-	function ShowModerateTable() {
+	function ShowModerateTable()
+	{
 		return $this->canModerate();
 	}
 
-	function PendingUsers() {
+	function PendingUsers()
+	{
 		if (!$this->canModerate()) return;
 
 		$awaitingapproval = new ArrayList();
 
-		foreach($this->PosterGroups() as $group) {
-			if($group->Members()) {
-				foreach($group->Members() as $member) {
-					if(!$member->Approved) {
+		foreach ($this->PosterGroups() as $group) {
+			if ($group->Members()) {
+				foreach ($group->Members() as $member) {
+					if (!$member->Approved) {
 						$awaitingapproval->add($member);
 					}
 				}
@@ -1521,11 +1569,12 @@ class Forum_Controller extends Page_Controller {
 	 * Process's the moving of a given topic. Has to check for admin privledges,
 	 * passed an old topic id (post id in URL) and a new topic id
 	 */
-	function doAdminFormFeatures($data, $form) {
-		if(isset($data['ID'])) {
+	function doAdminFormFeatures($data, $form)
+	{
+		if (isset($data['ID'])) {
 			$thread = ForumThread::get()->byID($data['ID']);
 
-			if($thread) {
+			if ($thread) {
 				if (!$thread->canModerate()) {
 					return Security::permissionFailure($this);
 				}
@@ -1540,14 +1589,15 @@ class Forum_Controller extends Page_Controller {
 
 	// Approves posts that require moderation
 
-	function approvepost(SS_HTTPRequest $request) {
+	function approvepost(SS_HTTPRequest $request)
+	{
 		$currentUser = Member::currentUser();
-		if(!isset($this->urlParams['ID'])) return $this->httpError(400);
-		if(!$this->canModerate()) return $this->httpError(403);
+		if (!isset($this->urlParams['ID'])) return $this->httpError(400);
+		if (!$this->canModerate()) return $this->httpError(403);
 
 		$post = Post::get()->byID($this->urlParams['ID']);
-		if($post) {
-			if($post->AwaitingEdit) {
+		if ($post) {
+			if ($post->AwaitingEdit) {
 				// This post is requiring an edit
 				$post->Content = $post->StagedContent;
 				$post->StagedContent = null;
@@ -1559,9 +1609,9 @@ class Forum_Controller extends Page_Controller {
 
 			$member = $post->Author();
 
-			if($post->isFirstPost()){
+			if ($post->isFirstPost()) {
 				$postType = 'Topic';
-			}else{
+			} else {
 				$postType = 'Post';
 			}
 			$postTypeObj = Varchar::create();
@@ -1591,13 +1641,14 @@ class Forum_Controller extends Page_Controller {
 	// Approves posts that require moderation
 
 
-	function revertedit(SS_HTTPRequest $request) {
-		if(!isset($this->urlParams['ID'])) return $this->httpError(400);
-		if(!$this->canModerate()) return $this->httpError(403);
+	function revertedit(SS_HTTPRequest $request)
+	{
+		if (!isset($this->urlParams['ID'])) return $this->httpError(400);
+		if (!$this->canModerate()) return $this->httpError(403);
 
 		$post = Post::get()->byID($this->urlParams['ID']);
-		if($post) {
-			if($post->AwaitingEdit) {
+		if ($post) {
+			if ($post->AwaitingEdit) {
 				// This post is requiring an edit but needs to be reverted
 				$post->StagedContent = null;
 				$post->AwaitingEdit = false;
@@ -1607,9 +1658,9 @@ class Forum_Controller extends Page_Controller {
 
 			$member = $post->Author();
 
-			if($post->isFirstPost()){
+			if ($post->isFirstPost()) {
 				$postType = 'Topic';
-			}else{
+			} else {
 				$postType = 'Post';
 			}
 			$postTypeObj = Varchar::create();
@@ -1654,8 +1705,10 @@ class Forum_Controller extends Page_Controller {
  * be a native ability in 3.1, but for now we need to.
  * TODO: Remove once API in core
  */
-class Forum_DataQuery extends DataQuery {
-	function __construct($dataClass, $query) {
+class Forum_DataQuery extends DataQuery
+{
+	function __construct($dataClass, $query)
+	{
 		parent::__construct($dataClass);
 		$this->query = $query;
 	}
